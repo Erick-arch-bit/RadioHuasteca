@@ -1,0 +1,46 @@
+import { filters } from '../data/radioData'
+
+export function CommunityFeed({ activeFilter, onFilterChange, posts, onOpenPost, subscriptions, onToggleSubscription }) {
+  return (
+    <section className="feed-column" id="comunidad">
+      <div className="section-header">
+        <div>
+          <p className="kicker">DE TU COMUNIDAD</p>
+          <h2>Lo que está pasando</h2>
+        </div>
+        <button className="text-button" type="button" onClick={() => onFilterChange('Todo')}>Ver todo ↗</button>
+      </div>
+      <div className="filter-row">
+        {filters.map((filter) => (
+          <button className={activeFilter === filter ? 'selected' : ''} type="button" key={filter} onClick={() => onFilterChange(filter)}>{filter}</button>
+        ))}
+        <span>{posts.length} publicaciones</span>
+      </div>
+      <div className="post-list">
+        {posts.map((post, index) => (
+          <article className={`post ${index === 0 ? 'featured' : ''}`} key={post.title} role="button" tabIndex="0" onClick={() => onOpenPost(post)} onKeyDown={(event) => event.key === 'Enter' && onOpenPost(post)}>
+            <div className={`post-picture ${post.color}`} style={{ backgroundImage: `url(${post.image})` }}>
+              <span>{post.category}</span>
+            </div>
+            <div className="post-content">
+              <div className="post-meta">
+                <span className="mini-avatar">{post.author.charAt(0)}</span>
+                <span><strong>{post.author}</strong><small>{post.time} · Universidad</small></span>
+                <button className={`subscribe-button ${subscriptions.includes(post.author) ? 'subscribed' : ''}`} type="button" onClick={(event) => { event.stopPropagation(); onToggleSubscription(post.author) }}>
+                  {subscriptions.includes(post.author) ? 'Suscrito' : 'Suscribirse'}
+                </button>
+              </div>
+              <h3>{post.title}</h3>
+              <p>{post.text}</p>
+              <div className="post-footer">
+                <span>♡ 24</span>
+                <span>◌ 8</span>
+                <button type="button" aria-label="Compartir" onClick={(event) => event.stopPropagation()}>↗</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
