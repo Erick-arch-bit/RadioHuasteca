@@ -1,2 +1,2 @@
-html { scroll-behavior: smooth; }
-body { min-width: 320px; }
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=DM+Mono:wght@400;500&display=swap');
+:root{font-family:'Atkinson Hyperlegible',Arial,sans-serif;color:#153d38;background:#f8f5ed}*{box-sizing:border-box}html{scroll-behavior:smooth}body{min-width:320px;margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #f4c842;outline-offset:3px}
