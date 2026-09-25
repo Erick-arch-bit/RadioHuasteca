@@ -1,6 +1,0 @@
-import {useRef,useState} from 'react'
-export function PlayerHero({labels}){
- const o=useRef(),[on,setOn]=useState(false)
- const play=()=>{if(o.current){o.current.stop();o.current=null;setOn(false);return}try{const c=new AudioContext(),x=c.createOscillator(),g=c.createGain();x.connect(g).connect(c.destination);g.gain.value=.08;x.onended=()=>{o.current=null;setOn(false);c.close()};x.start();x.stop(c.currentTime+2);o.current=x;setOn(true)}catch{setOn(false)}}
- return <section className={'hero-player'} id={'inicio'}><div className={'hero-copy'}><p className={'eyebrow'}>{labels.welcome}</p><h1>{labels.title}</h1><p className={'description'}>{labels.description}</p><div className={'bulletin-card'} id={'boletin'}><span aria-hidden={true}>Audio</span><div><p>{labels.bulletinTitle}</p><small>{labels.bulletinMeta}</small></div></div><div className={'player-controls'}><button className={'play-button'} onClick={play} type={'button'} aria-pressed={on}>{on?labels.pause:labels.play}</button><span className={'audio-status'} role={'status'} aria-live={'polite'}>{on?labels.playing:labels.ready}</span></div></div><div className={'hero-visual'} aria-hidden={true}><div className={'radio-mark'}>RH</div><p>{labels.status}</p></div></section>
-}

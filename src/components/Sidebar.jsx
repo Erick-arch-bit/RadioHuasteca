@@ -1,3 +1,0 @@
-export function Sidebar({items,labels,mobileOpen,onSelect}){
- return <aside className={`sidebar ${mobileOpen?'mobile-open':''}`}><button className={'logo'} type={'button'} onClick={()=>onSelect('inicio')} aria-label={labels.home}><span>RH</span><strong>{labels.stationName}</strong></button><p className={'station-location'}>Santa Ana Hueytlalpan, Hidalgo</p><nav aria-label={labels.menu}>{items.map(item=><button key={item.id} type={'button'} onClick={()=>onSelect(item.id)}><span aria-hidden={true}>{item.icon}</span>{labels[item.key]}</button>)}</nav><p className={'sidebar-note'}>{labels.languageNotice}</p></aside>
-}
