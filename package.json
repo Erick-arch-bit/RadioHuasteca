@@ -1,13 +1,16 @@
 {
-  "name": "radiohuastecaapp",
+  "name": "radiohuasteca",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Plataforma web de radio comunitaria indígena de baja conectividad para Santa Ana Hueytlalpan, Hidalgo.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:sprint1": "node scripts/verify-sprint-1.mjs",
+    "audio:generate": "bash scripts/generate-bulletin-audio.sh"
   },
   "dependencies": {
     "lucide-react": "^1.47.0",

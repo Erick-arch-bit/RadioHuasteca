@@ -1,24 +1,58 @@
 @import "tailwindcss";
 
-:root {
-  font-family: 'Trebuchet MS', 'Gill Sans', sans-serif;
-  color: #173d38;
-  background: #f4eddd;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  --ink: #173d38;
-  --forest: #155b50;
-  --water: #2b9e9a;
-  --clay: #b75f42;
-  --sun: #f2b84b;
-  --cream: #f4eddd;
-  --paper: #fffaf0;
-  --line: #d8cbb6;
+/* ---------------------------------------------------------------------------
+   RadioHuasteca · Tokens de diseño (Sprint 1)
+   Tailwind v4 declara aquí la identidad visual del proyecto: paleta inspirada
+   en la Huasteca (vegetación, ríos, barro y manta), tipografías y los dos
+   puntos de cambio del layout mobile-first.
+   Justificación del CSS propio conservado: docs/sprint-1-spec.md §2.6
+   --------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Trebuchet MS', 'Gill Sans', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+
+  --color-ink: #173d38;
+  --color-forest: #155b50;
+  --color-forest-deep: #1e6c5d;
+  --color-forest-darker: #174c44;
+  --color-water: #2b9e9a;
+  --color-clay: #b75f42;
+  --color-sun: #f2b84b;
+  --color-cream: #f4eddd;
+  --color-paper: #fffaf0;
+  --color-line: #d8cbb6;
+  --color-muted: #5d6e66;
+  --color-muted-note: #6f8178;
+  --color-leaf: #d5e9d6;
+  --color-mist: #d7efdc;
+  --color-lagoon: #9eddd1;
+  --color-teal: #58b7a5;
+
+  /* Móvil de gama baja: 320 px, 360 px y 390 px quedan en el tramo "xs". */
+  --breakpoint-xs: 400px;
+  /* Punto de cambio móvil/escritorio del Sprint 1. */
+  --breakpoint-desk: 681px;
+
+  --animate-reveal: reveal 0.6s ease both;
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; background: var(--cream); }
-button { font: inherit; }
-button:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
-#root { min-height: 100svh; }
+@layer base {
+  /* Foco visible en toda la interfaz: se declara una sola vez en lugar de
+     repetir utilidades de foco en cada control (accesibilidad transversal). */
+  :focus-visible {
+    outline: 3px solid var(--color-sun);
+    outline-offset: 3px;
+  }
+}
+
