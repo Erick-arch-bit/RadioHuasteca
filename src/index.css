@@ -1,2 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=DM+Mono:wght@400;500&display=swap');
-:root{font-family:'Atkinson Hyperlegible',Arial,sans-serif;color:#243b36;background:#f7f1e6;--ink:#243b36;--forest:#1e5147;--leaf:#39725a;--maize:#f2c84b;--clay:#c95f49;--paper:#f7f1e6;--line:#d5c9b8;--muted:#5d7168}*{box-sizing:border-box}html{scroll-behavior:smooth}body{min-width:320px;margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid var(--maize);outline-offset:3px}
+@import "tailwindcss";
+
+:root {
+  font-family: 'Trebuchet MS', 'Gill Sans', sans-serif;
+  color: #173d38;
+  background: #f4eddd;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #173d38;
+  --forest: #155b50;
+  --water: #2b9e9a;
+  --clay: #b75f42;
+  --sun: #f2b84b;
+  --cream: #f4eddd;
+  --paper: #fffaf0;
+  --line: #d8cbb6;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: var(--cream); }
+button { font: inherit; }
+button:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+#root { min-height: 100svh; }
