@@ -11,7 +11,7 @@ export function BottomNav({ copy, activeView, onSelect }) {
     <nav
       data-testid="bottom-nav"
       aria-label={copy.navigationLabel}
-      className="fixed bottom-0 left-1/2 z-20 grid w-[min(100%,720px)] -translate-x-1/2 grid-cols-4 border border-b-0 border-line bg-paper/95 px-2.5 pt-[9px] pb-2.5 shadow-[0_-8px_20px_rgba(23,61,56,.05)] desk:rounded-t-[14px] max-xs:px-1"
+      className="fixed bottom-0 left-1/2 z-20 grid w-[min(100%,720px)] -translate-x-1/2 grid-cols-5 border border-b-0 border-line bg-paper/95 px-2.5 pt-[9px] pb-2.5 shadow-[0_-8px_20px_rgba(23,61,56,.05)] desk:rounded-t-[14px] max-xs:px-1"
     >
       {navigationItems.map(({ id, labelKey, Icon }) => {
         const isActive = activeView === id

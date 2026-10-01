@@ -1,4 +1,4 @@
-import { BellRing, BookOpen, Home, Info } from 'lucide-react'
+import { BellRing, BookOpen, Home, Info, Radio } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // RadioHuasteca · Navegación del Sprint 1 (HU-02)
@@ -11,6 +11,7 @@ export const homeItem = { id: 'inicio', labelKey: 'navHome', Icon: Home, primary
 export const navigationItems = [
   homeItem,
   { id: 'avisos', labelKey: 'navNotices', Icon: BellRing, primary: false },
+  { id: 'capsulas', labelKey: 'navCapsules', Icon: Radio, primary: false },
   { id: 'tramites', labelKey: 'navProcedures', Icon: BookOpen, primary: false },
   { id: 'sobre', labelKey: 'navAbout', Icon: Info, primary: false },
 ]

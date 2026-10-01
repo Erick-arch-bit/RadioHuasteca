@@ -2,13 +2,16 @@
 
 Plataforma web de **radio comunitaria indígena de baja conectividad** para **Santa Ana Hueytlalpan, Hidalgo**. Reúne los avisos de la comunidad, los boletines de audio y los contenidos bilingües en **español y Hñähñu**, pensados primero para celulares de gama baja y conexiones lentas.
 
-Este repositorio corresponde al **Sprint 1**: estructura inicial móvil, navegación por iconos, textos prioritarios bilingües y reproducción del último boletín.
+El **Sprint 1** estableció la estructura móvil, navegación y reproducción del último boletín. El **Sprint 2** añade avisos comunitarios y un catálogo básico de cápsulas, guiado por especificación SDD.
 
 | Documento | Contenido |
 | --- | --- |
 | [`docs/sprint-1-spec.md`](docs/sprint-1-spec.md) | Especificación técnica (Spec-Driven Development): comportamiento, estados, criterios de aceptación y evidencias requeridas |
 | [`docs/sprint-1-verification.md`](docs/sprint-1-verification.md) | Resultado de la verificación y cómo reproducir cada evidencia |
+| [`docs/sprint-2-spec.md`](docs/sprint-2-spec.md) | Especificación, criterios de aceptación y plan del Sprint 2 (SDD) |
+| [`docs/sprint-2-verification.md`](docs/sprint-2-verification.md) | Procedimiento, resultados, capturas y limitaciones del Sprint 2 |
 | [`docs/evidence/sprint-1/`](docs/evidence/sprint-1/) | Capturas por ancho de pantalla e informe automático |
+| [`docs/evidence/sprint-2/`](docs/evidence/sprint-2/) | Capturas de avisos, cápsulas, formulario y anchos móviles; informe automático |
 
 ## Stack
 
@@ -197,7 +200,15 @@ Si `chromium` no está disponible, las pruebas de interfaz se omiten (se muestra
 | HU-13 | Estructura bilingüe | Diccionarios ES / Hñähñu con aviso de traducción pendiente de validación |
 | Técnica | Repositorio | React + Vite + Tailwind CSS, README, `npm run build` y verificación automática |
 
-**Fuera de alcance en este sprint** (previsto para los siguientes): avisos comunitarios, fonoteca o catálogo de audios, trámites con apoyo auditivo, inicio de sesión, panel de administración, buzón de participación ciudadana, backend Node/Express y base de datos PostgreSQL.
+**Fuera de alcance actual** (para sprints posteriores): trámites con apoyo auditivo, inicio de sesión, administración autenticada, buzón ciudadano, backend Node/Express y base de datos PostgreSQL.
+
+## Sprint 2: avisos comunitarios y cápsulas
+
+El Sprint 2 añade una lista de avisos con filtros por prioridad/estado, señal visual para avisos urgentes y reproducción de audio local; un catálogo de cápsulas con controles de reproducción, pausa y detención; y un formulario de registro con campos obligatorios.
+
+El formulario es una demostración local: los avisos que agregues se guardan en `localStorage` del navegador actual. No hay cuenta de administrador, servidor, respaldo ni sincronización entre dispositivos. Los dos elementos de catálogo son muestras de los formatos Opus y MP3 ya incluidos (el mismo contenido de audio de prueba); reemplázalos por cápsulas grabadas y metadatos reales antes de publicar.
+
+La especificación SDD está en [`docs/sprint-2-spec.md`](docs/sprint-2-spec.md), el procedimiento en [`docs/sprint-2-verification.md`](docs/sprint-2-verification.md) y los resultados y capturas en [`docs/evidence/sprint-2/`](docs/evidence/sprint-2/). Para generar evidencia UI con Chrome instalado, inicia primero `npm run dev` y en otra consola ejecuta `npm run verify:sprint2`. La verificación cubre 320/360/390 px, registro y persistencia local, controles de cápsulas y regresión del boletín del Sprint 1. `npm run build` y `npm run lint` comprueban compilación y análisis estático.
 
 ## Accesibilidad y rendimiento
 
@@ -209,5 +220,4 @@ Si `chromium` no está disponible, las pruebas de interfaz se omiten (se muestra
 ## Dirección visual
 
 La paleta parte de referencias de la Huasteca: verdes de la vegetación, turquesa de sus ríos y cascadas, terracota del barro y crema de manta. Los colores son una interpretación de diseño, no una paleta oficial única de la región. Los tokens viven en `src/index.css` (`@theme`), de modo que cualquier ajuste visual se hace en un solo lugar.
-
 

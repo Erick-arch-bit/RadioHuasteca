@@ -2,16 +2,19 @@ import { useCallback, useRef, useState } from 'react'
 import { Settings } from 'lucide-react'
 import { BulletinAudio } from './components/BulletinAudio'
 import { BulletinCard } from './components/BulletinCard'
+import { CapsuleCatalog } from './components/CapsuleCatalog'
 import { BottomNav } from './components/BottomNav'
 import { InnerView } from './components/InnerView'
 import { LanguageDraftNotice } from './components/LanguageDraftNotice'
 import { MobileMenu } from './components/MobileMenu'
+import { NoticeView } from './components/NoticeView'
 import { QuickNav } from './components/QuickNav'
 import { TopBar } from './components/TopBar'
 import { WelcomeBlock } from './components/WelcomeBlock'
 import { audioSources } from './data/bulletin'
 import { findNavigationItem, homeItem } from './data/navigation'
 import { useBulletinAudio } from './hooks/useBulletinAudio'
+import { useNotices } from './hooks/useNotices'
 import { defaultLocale, getCopy, isDraftLocale } from './i18n/translations'
 
 // ---------------------------------------------------------------------------
@@ -28,7 +31,11 @@ function App() {
   const [activeView, setActiveView] = useState(homeItem.id)
   const [menuOpen, setMenuOpen] = useState(false)
   const bulletinAudioRef = useRef(null)
+  const capsuleAudioRef = useRef(null)
   const player = useBulletinAudio(bulletinAudioRef)
+  const notices = useNotices()
+  const [activeCapsuleId, setActiveCapsuleId] = useState(null)
+  const [capsuleState, setCapsuleState] = useState('idle')
 
   const copy = getCopy(locale)
   const currentItem = findNavigationItem(activeView)
@@ -45,6 +52,48 @@ function App() {
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const toggleMenu = useCallback(() => setMenuOpen((open) => !open), [])
 
+  const playCapsule = useCallback(async (capsule) => {
+    const audio = capsuleAudioRef.current
+    if (!audio) return
+    if (activeCapsuleId === capsule.id && capsuleState === 'playing') {
+      audio.pause()
+      setCapsuleState('paused')
+      return
+    }
+    if (activeCapsuleId !== capsule.id || audio.src !== new URL(capsule.src[0].src, window.location.href).href) {
+      audio.pause()
+      audio.src = capsule.src[0].src
+      audio.load()
+    }
+    setActiveCapsuleId(capsule.id)
+    setCapsuleState('loading')
+    try {
+      await audio.play()
+      setCapsuleState('playing')
+    } catch {
+      setCapsuleState('error')
+    }
+  }, [activeCapsuleId, capsuleState])
+
+  const pauseCapsule = useCallback(() => {
+    capsuleAudioRef.current?.pause()
+    setCapsuleState('paused')
+  }, [])
+
+  const stopCapsule = useCallback(() => {
+    const audio = capsuleAudioRef.current
+    if (audio) {
+      audio.pause()
+      audio.currentTime = 0
+    }
+    setCapsuleState('idle')
+  }, [])
+
+  const playNoticeAudio = useCallback((noticeId) => {
+    const notice = notices.visibleNotices.find((item) => item.id === noticeId)
+    if (notice?.audio) playCapsule({ id: notice.id, src: notice.audio })
+  }, [notices.visibleNotices, playCapsule])
+
   return (
     <div
       data-testid="app-shell"
@@ -56,6 +105,16 @@ function App() {
         audioRef={bulletinAudioRef}
         onError={player.reportSourceError}
         sources={audioSources}
+      />
+      <audio
+        ref={capsuleAudioRef}
+        data-testid="capsule-audio"
+        preload="none"
+        className="hidden"
+        onPlaying={() => setCapsuleState('playing')}
+        onPause={() => setCapsuleState((state) => state === 'idle' || capsuleAudioRef.current?.currentTime === 0 ? 'idle' : 'paused')}
+        onEnded={() => setCapsuleState('idle')}
+        onError={() => setCapsuleState('error')}
       />
 
       {menuOpen ? (
@@ -88,6 +147,17 @@ function App() {
             <BulletinCard copy={copy} player={player} sources={audioSources} />
             <QuickNav copy={copy} onSelect={goTo} />
           </>
+        ) : activeView === 'avisos' ? (
+          <NoticeView copy={copy} notices={notices} onPlayAudio={playNoticeAudio} />
+        ) : activeView === 'capsulas' ? (
+          <CapsuleCatalog
+            copy={copy}
+            activeId={activeCapsuleId}
+            playbackState={capsuleState}
+            onPlay={playCapsule}
+            onPause={pauseCapsule}
+            onStop={stopCapsule}
+          />
         ) : (
           <InnerView copy={copy} item={currentItem} onGoHome={goHome} />
         )}

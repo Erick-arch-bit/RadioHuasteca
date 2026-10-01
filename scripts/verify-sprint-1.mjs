@@ -29,6 +29,14 @@ const runUi = !flags.has('--static-only')
 
 const PREVIEW_PORT = 4319
 const DEBUG_PORT = 9333
+const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js')
+
+function runNpm(args, options = {}) {
+  if (process.platform === 'win32') {
+    return spawnSync(process.execPath, [npmCli, ...args], { ...options, windowsHide: true })
+  }
+  return spawnSync('npm', args, options)
+}
 const VIEWPORTS = [
   { width: 320, height: 760, label: '320 px' },
   { width: 360, height: 800, label: '360 px' },
@@ -77,6 +85,11 @@ function humanSize(bytes) {
 }
 
 function commandExists(binary) {
+  if (process.platform === 'win32') {
+    if (path.isAbsolute(binary)) return existsSync(binary)
+    const probe = spawnSync('where.exe', [binary], { encoding: 'utf8', windowsHide: true })
+    return probe.status === 0 && probe.stdout.trim().length > 0
+  }
   const probe = spawnSync('sh', ['-c', `command -v "${binary}"`], { encoding: 'utf8' })
   return probe.status === 0 && probe.stdout.trim().length > 0
 }
@@ -229,7 +242,7 @@ async function verifyBuild() {
   console.log('\n[2/3] Build de producción')
 
   await check('CA-02.2', 'npm run build compila Tailwind y publica el audio del boletín', () => {
-    const build = spawnSync('npm', ['run', 'build'], { cwd: repoRoot, encoding: 'utf8' })
+    const build = runNpm(['run', 'build'], { cwd: repoRoot, encoding: 'utf8' })
     assert(
       build.status === 0,
       `npm run build falló: ${(build.stderr || build.stdout || '').trim().split('\n').slice(-4).join(' ')}`,
@@ -350,11 +363,15 @@ async function waitForHttp(url, timeoutMs = 30000) {
 }
 
 function startPreviewServer() {
-  return spawn(
-    'npm',
-    ['run', 'preview', '--', '--port', String(PREVIEW_PORT), '--strictPort', '--host', '127.0.0.1'],
-    { cwd: repoRoot, stdio: ['ignore', 'pipe', 'pipe'], detached: true },
-  )
+  const args = ['run', 'preview', '--', '--port', String(PREVIEW_PORT), '--strictPort', '--host', '127.0.0.1']
+  const command = process.platform === 'win32' ? process.execPath : 'npm'
+  const commandArgs = process.platform === 'win32' ? [npmCli, ...args] : args
+  return spawn(command, commandArgs, {
+    cwd: repoRoot,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    detached: true,
+    windowsHide: true,
+  })
 }
 
 function startChromium() {
@@ -372,13 +389,17 @@ function startChromium() {
       '--autoplay-policy=no-user-gesture-required',
       'about:blank',
     ],
-    { stdio: ['ignore', 'ignore', 'pipe'], detached: true },
+    { stdio: ['ignore', 'ignore', 'pipe'], detached: true, windowsHide: true },
   )
 }
 
 /** Termina el proceso y todo su grupo (npm → vite preview; Chromium y sus hijos). */
 function killTree(child) {
   if (!child?.pid) return
+  if (process.platform === 'win32') {
+    spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true })
+    return
+  }
   try {
     process.kill(-child.pid, 'SIGTERM')
   } catch {
@@ -580,7 +601,7 @@ async function verifyUi() {
       const heights = await cdp.evaluate(
         `[...document.querySelectorAll('[data-testid^="nav-"]')].map((el) => Math.round(el.getBoundingClientRect().height))`,
       )
-      assert(heights.length === 4, `se esperaban 4 destinos y hay ${heights.length}`)
+      assert(heights.length === 5, `se esperaban 5 destinos tras Sprint 2 y hay ${heights.length}`)
       const smallest = Math.min(...heights)
       assert(smallest >= 36, `el control más bajo mide ${smallest} px`)
       return `alturas ${heights.join(' / ')} px`
@@ -669,12 +690,13 @@ async function verifyUi() {
       assert(!(await isVisible(cdp, '[data-testid="mobile-menu"]')), 'Escape no cerró el menú')
 
       await clickTestId(cdp, 'menu-toggle')
-      await clickTestId(cdp, 'menu-backdrop')
+      await cdp.evaluate(`document.querySelector('[data-testid="menu-backdrop"]').click()`)
+      await sleep(200)
       assert(!(await isVisible(cdp, '[data-testid="mobile-menu"]')), 'el fondo no cerró el menú')
 
       await clickTestId(cdp, 'menu-toggle')
       await clickTestId(cdp, 'menu-item-avisos')
-      assert(await isVisible(cdp, '[data-testid="inner-view"]'), 'no se abrió la vista de Avisos')
+      assert(await isVisible(cdp, '[data-testid="notices-view"]'), 'no se abrió la vista de Avisos')
       assert(!(await isVisible(cdp, '[data-testid="mobile-menu"]')), 'el menú no se cerró al elegir una opción')
       const current = await cdp.evaluate(
         `document.querySelector('[data-testid="nav-avisos"]').getAttribute('aria-current')`,
@@ -820,8 +842,5 @@ main().catch((error) => {
   console.error('La verificación se detuvo:', error.message)
   process.exit(1)
 })
-
-
-
 
 

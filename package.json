@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "verify:sprint1": "node scripts/verify-sprint-1.mjs",
+    "verify:sprint2": "node scripts/verify-sprint-2.mjs",
     "audio:generate": "bash scripts/generate-bulletin-audio.sh"
   },
   "dependencies": {
