@@ -35,6 +35,9 @@ export const translations = {
     navNotices: 'Avisos',
     navCapsules: 'Cápsulas',
     navProcedures: 'Trámites',
+    navAdmin: 'Administración',
+    navPhonotheque: 'Fonoteca',
+    navCitizenBox: 'Buzón',
     navAbout: 'Sobre',
     navigationLabel: 'Navegación principal',
 
@@ -135,7 +138,7 @@ export const translations = {
       'Estructura en Hñähñu preparada: la traducción está pendiente de validación con hablantes de la comunidad y no es una versión final.',
     draftBadge: 'Borrador',
 
-    sprintNote: 'Sprint 2 · avisos y cápsulas de prueba',
+    sprintNote: 'RadioHuasteca · información de demostración',
   },
 }
 
@@ -158,6 +161,9 @@ translations.hnh = {
   navNotices: 'Aylal',
   navCapsules: 'Cápsulas',
   navProcedures: 'Ajan',
+  navAdmin: 'Administración',
+  navPhonotheque: 'Fonoteca',
+  navCitizenBox: 'Buzón',
   navAbout: 'In tin radio',
   navigationLabel: 'Ajan principal',
 
@@ -257,7 +263,7 @@ translations.hnh = {
     'Estructura en Hñähñu preparada: la traducción está pendiente de validación con hablantes de la comunidad y no es una versión final.',
   draftBadge: 'Borrador',
 
-  sprintNote: 'Sprint 2 · avisos y cápsulas de prueba',
+  sprintNote: 'RadioHuasteca · información de demostración',
 }
 
 /** Idiomas cuyo contenido está en borrador y debe anunciarse como tal. */

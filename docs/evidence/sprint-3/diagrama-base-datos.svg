@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <rect width="1280" height="760" fill="#f4eddd"/><text x="64" y="66" font-family="Arial" font-size="32" font-weight="700" fill="#173d38">RadioHuasteca · Sprint 3 · Modelo de datos PostgreSQL</text>
+  <g font-family="Arial" fill="#173d38">
+    <rect x="66" y="128" width="390" height="310" rx="18" fill="#fffaf0" stroke="#155b50" stroke-width="3"/><path d="M66 184h390" stroke="#155b50" stroke-width="2"/><text x="92" y="166" font-size="23" font-weight="700">admin_users</text>
+    <text x="92" y="224" font-size="18">id · PK</text><text x="92" y="260" font-size="18">username · UNIQUE, NOT NULL</text><text x="92" y="296" font-size="18">email · UNIQUE, NOT NULL</text><text x="92" y="332" font-size="18">display_name · NOT NULL</text><text x="92" y="368" font-size="18">password_hash · bcrypt</text>
+    <rect x="500" y="128" width="400" height="410" rx="18" fill="#fffaf0" stroke="#155b50" stroke-width="3"/><path d="M500 184h400" stroke="#155b50" stroke-width="2"/><text x="526" y="166" font-size="23" font-weight="700">procedures</text>
+    <text x="526" y="224" font-size="18">id · PK</text><text x="526" y="260" font-size="18">title · UNIQUE, NOT NULL</text><text x="526" y="296" font-size="18">summary · NOT NULL</text><text x="526" y="332" font-size="18">requirements · JSONB no vacío</text><text x="526" y="368" font-size="18">steps · JSONB no vacío</text><text x="526" y="404" font-size="18">responsible · NOT NULL</text><text x="526" y="440" font-size="18">validity · opcional</text><text x="526" y="476" font-size="18">priority · boolean</text><text x="526" y="512" font-size="18">translations · ES / Hñähñu</text>
+    <rect x="956" y="160" width="270" height="330" rx="18" fill="#fffaf0" stroke="#b75f42" stroke-width="3"/><path d="M956 216h270" stroke="#b75f42" stroke-width="2"/><text x="980" y="198" font-size="21" font-weight="700">procedure_audios</text>
+    <text x="980" y="256" font-size="17">id · PK</text><text x="980" y="292" font-size="17">procedure_id · FK, UNIQUE</text><text x="980" y="328" font-size="17">url · NOT NULL</text><text x="980" y="364" font-size="17">language · es / hnh</text><text x="980" y="400" font-size="17">voice_name · opcional</text><text x="980" y="436" font-size="17">is_demo · boolean</text>
+  </g>
+  <path d="M900 300h56" stroke="#155b50" stroke-width="4"/><path d="M944 291l12 9-12 9" fill="none" stroke="#155b50" stroke-width="4"/><text x="905" y="276" font-family="Arial" font-size="15" fill="#173d38">1 : 0..1</text>
+  <text x="66" y="606" font-family="Arial" font-size="18" fill="#173d38">procedure_audios.procedure_id referencia procedures.id con ON DELETE CASCADE.</text>
+  <text x="66" y="642" font-family="Arial" font-size="18" fill="#173d38">Una fila de trámite puede tener cero o un audio asociado; no se permiten audios huérfanos ni duplicados.</text>
+  <text x="66" y="696" font-family="Arial" font-size="15" fill="#5d6e66">Semilla comprobada en esta instalación: 3 trámites · 2 audios asociados · 0 audios huérfanos.</text>
+  </svg>

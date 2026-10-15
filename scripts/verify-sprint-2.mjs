@@ -59,7 +59,7 @@ async function waitFor(expression, timeout = 12000) {
     if (result) return result
     await delay(100)
   }
-  throw new Error(`Timed out waiting for ${fn}`)
+  throw new Error(`Timed out waiting for browser condition: ${expression}`)
 }
 async function click(selector) {
   await waitFor(`Boolean(document.querySelector(${JSON.stringify(selector)}))`)

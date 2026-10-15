@@ -1,6 +1,6 @@
 # Verificación Sprint 2 · RadioHuasteca
 
-Fecha: 2026-09-30
+Fecha: 2026-10-06
 Entorno: Vite local, Chrome headless, 390×844 y anchos 320/360/390 px.
 
 - CA-12.1: PASS — Sin scroll horizontal a 320, 360 y 390 px

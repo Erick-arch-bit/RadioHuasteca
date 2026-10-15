@@ -13,6 +13,14 @@ El **Sprint 1** estableció la estructura móvil, navegación y reproducción de
 | [`docs/evidence/sprint-1/`](docs/evidence/sprint-1/) | Capturas por ancho de pantalla e informe automático |
 | [`docs/evidence/sprint-2/`](docs/evidence/sprint-2/) | Capturas de avisos, cápsulas, formulario y anchos móviles; informe automático |
 
+## Sprint 3 · Trámites y administración
+
+El Sprint 3 añade catálogo demostrativo con audio asociado por trámite, acceso administrativo y backend opcional Express/PostgreSQL. Consulta [`docs/sprint-3-spec.md`](docs/sprint-3-spec.md) para el diagrama, inicializar la base de datos y crear la cuenta de administrador.
+
+## Sprint 4 · Fonoteca, buzón ciudadano y moderación
+
+Sprint 4 incorpora cargas privadas de audio, Fonoteca filtrable, envíos ciudadanos de audio/video con estado inicial pendiente y moderación autenticada. Ejecuta `npm run db:init` para aplicar las tablas y la migración de rol. Consulta la [especificación](docs/sprint-4-spec.md), el [informe de verificación y evidencias](docs/sprint-4-verification.md) y la [retrospectiva](docs/sprint-4-retrospective.md). Los archivos subidos se guardan en `private-media/`, fuera del contenido estático.
+
 ## Stack
 
 | Capa | Tecnología |

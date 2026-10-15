@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { Settings } from 'lucide-react'
 import { BulletinAudio } from './components/BulletinAudio'
+import { AdminView } from './components/AdminView'
+import { CitizenBoxView, FonotecaView } from './components/MediaViews'
 import { BulletinCard } from './components/BulletinCard'
 import { CapsuleCatalog } from './components/CapsuleCatalog'
 import { BottomNav } from './components/BottomNav'
@@ -9,6 +11,7 @@ import { LanguageDraftNotice } from './components/LanguageDraftNotice'
 import { MobileMenu } from './components/MobileMenu'
 import { NoticeView } from './components/NoticeView'
 import { QuickNav } from './components/QuickNav'
+import { ProcedureView } from './components/ProcedureView'
 import { TopBar } from './components/TopBar'
 import { WelcomeBlock } from './components/WelcomeBlock'
 import { audioSources } from './data/bulletin'
@@ -36,6 +39,7 @@ function App() {
   const notices = useNotices()
   const [activeCapsuleId, setActiveCapsuleId] = useState(null)
   const [capsuleState, setCapsuleState] = useState('idle')
+  const [procedureViewKey, setProcedureViewKey] = useState(0)
 
   const copy = getCopy(locale)
   const currentItem = findNavigationItem(activeView)
@@ -43,6 +47,7 @@ function App() {
   const isDraft = isDraftLocale(locale)
 
   const goTo = useCallback((view) => {
+    if (view === 'tramites') setProcedureViewKey((key) => key + 1)
     setActiveView(view)
     setMenuOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -158,6 +163,14 @@ function App() {
             onPause={pauseCapsule}
             onStop={stopCapsule}
           />
+        ) : activeView === 'tramites' ? (
+          <ProcedureView key={procedureViewKey} locale={locale} />
+        ) : activeView === 'admin' ? (
+          <AdminView />
+        ) : activeView === 'fonoteca' ? (
+          <FonotecaView />
+        ) : activeView === 'buzon' ? (
+          <CitizenBoxView />
         ) : (
           <InnerView copy={copy} item={currentItem} onGoHome={goHome} />
         )}
