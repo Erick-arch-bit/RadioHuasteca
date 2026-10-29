@@ -10,9 +10,9 @@ export const homeItem = { id: 'inicio', labelKey: 'navHome', Icon: Home, primary
 
 export const navigationItems = [
   homeItem,
-  { id: 'avisos', labelKey: 'navNotices', Icon: BellRing, primary: false },
-  { id: 'capsulas', labelKey: 'navCapsules', Icon: Radio, primary: false },
-  { id: 'tramites', labelKey: 'navProcedures', Icon: BookOpen, primary: false },
+  { id: 'avisos', labelKey: 'navNotices', Icon: BellRing, primary: true },
+  { id: 'capsulas', labelKey: 'navCapsules', Icon: Radio, primary: true },
+  { id: 'tramites', labelKey: 'navProcedures', Icon: BookOpen, primary: true },
   { id: 'admin', labelKey: 'navAdmin', Icon: Shield, primary: false },
   { id: 'fonoteca', labelKey: 'navPhonotheque', Icon: Music2, primary: false },
   { id: 'buzon', labelKey: 'navCitizenBox', Icon: Send, primary: false },

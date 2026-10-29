@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { noticeSeeds } from '../data/notices'
-import { audioSources } from '../data/bulletin'
 
 const STORAGE_KEY = 'radiohuasteca-sprint2-notices'
+const API = import.meta.env?.VITE_API_URL ?? ''
 
 function readNotices() {
   try {
@@ -13,10 +13,29 @@ function readNotices() {
   }
 }
 
-export function useNotices() {
+export function useNotices(enabled = true) {
   const [notices, setNotices] = useState(readNotices)
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  useEffect(() => {
+    if (!enabled) return undefined
+    let active = true
+    const refresh = () => fetch(`${API}/api/notices`)
+      .then((response) => (response.ok ? response.json() : []))
+      .then((remote) => {
+        if (!active || !Array.isArray(remote)) return
+        setNotices((current) => {
+          const local = current.filter((notice) => notice.createdLocally)
+          const remoteIds = new Set(remote.map((notice) => notice.id))
+          return [...remote, ...local, ...noticeSeeds.filter((notice) => !remoteIds.has(notice.id))]
+        })
+      })
+      .catch(() => {})
+    window.addEventListener('radiohuasteca:notices-updated', refresh)
+    refresh()
+    return () => { active = false; window.removeEventListener('radiohuasteca:notices-updated', refresh) }
+  }, [enabled])
 
   useEffect(() => {
     try {
@@ -39,12 +58,5 @@ export function useNotices() {
     [notices, priorityFilter, statusFilter],
   )
 
-  function addNotice(notice) {
-    const created = { ...notice, id: `notice-${Date.now()}`, createdLocally: true }
-    setNotices((current) => [created, ...current])
-    setPriorityFilter('all')
-    setStatusFilter('all')
-  }
-
-  return { visibleNotices, addNotice, priorityFilter, setPriorityFilter, statusFilter, setStatusFilter, sampleAudio: audioSources }
+  return { visibleNotices, priorityFilter, setPriorityFilter, statusFilter, setStatusFilter }
 }

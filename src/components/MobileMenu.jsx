@@ -8,7 +8,7 @@ import { navigationItems } from '../data/navigation'
 // los accesos rápidos ya ofrecen todos los destinos.
 // ---------------------------------------------------------------------------
 
-export function MobileMenu({ copy, onClose, onSelect }) {
+export function MobileMenu({ activeView, copy, onClose, onSelect }) {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') onClose()
@@ -22,7 +22,7 @@ export function MobileMenu({ copy, onClose, onSelect }) {
       id="mobile-menu"
       data-testid="mobile-menu"
       aria-label={copy.menuTitle}
-      className="absolute inset-x-0 top-full border-b border-line bg-paper shadow-[0_12px_24px_rgba(23,61,56,.08)] desk:hidden"
+      className="absolute inset-x-0 top-full max-h-[calc(100svh-76px)] overflow-y-auto border-b border-line bg-paper shadow-[0_12px_24px_rgba(23,61,56,.08)] max-xs:max-h-[calc(100svh-68px)]"
     >
       <nav aria-label={copy.navigationLabel} className="grid gap-1 px-[13px] py-3">
         {navigationItems.map(({ id, labelKey, Icon }) => (
@@ -30,6 +30,7 @@ export function MobileMenu({ copy, onClose, onSelect }) {
             key={id}
             type="button"
             data-testid={`menu-item-${id}`}
+            aria-current={activeView === id ? 'page' : undefined}
             onClick={() => onSelect(id)}
             className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-transparent bg-cream/60 px-3 py-2.5 text-left text-ink active:bg-cream"
           >

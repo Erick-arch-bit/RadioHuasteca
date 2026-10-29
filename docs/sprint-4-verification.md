@@ -15,7 +15,7 @@ Alcance de esta revisión: compilación, lint, migración PostgreSQL, disponibil
 | `npm run build` | PASS | Vite compiló la aplicación de producción. |
 | `npm run lint` | PASS | Oxlint terminó sin advertencias. |
 | `node --check server/index.js` | PASS | Sintaxis válida. |
-| Carga de audio real, envío ciudadano de audio/video y decisión de moderación | PENDIENTE DE EVIDENCIA MANUAL | Requiere medios de prueba y una cuenta operadora local. Seguir los pasos de abajo. |
+| Carga de audio real, envío ciudadano de foto/audio/video y decisión de moderación | PENDIENTE DE EVIDENCIA MANUAL | Requiere PostgreSQL, Cloudinary, medios de prueba y una cuenta operadora local. Seguir los pasos de abajo. |
 
 ## Matriz de demostración manual
 

@@ -2,7 +2,7 @@
 
 Plataforma web de **radio comunitaria indígena de baja conectividad** para **Santa Ana Hueytlalpan, Hidalgo**. Reúne los avisos de la comunidad, los boletines de audio y los contenidos bilingües en **español y Hñähñu**, pensados primero para celulares de gama baja y conexiones lentas.
 
-El **Sprint 1** estableció la estructura móvil, navegación y reproducción del último boletín. El **Sprint 2** añade avisos comunitarios y un catálogo básico de cápsulas, guiado por especificación SDD.
+El **Sprint 1** estableció la estructura móvil, navegación y reproducción del último boletín. Los siguientes incrementos agregan avisos, cápsulas, trámites, administración, Fonoteca y moderación. La navegación prioriza cuatro secciones y conserva los demás destinos bajo “Más”.
 
 | Documento | Contenido |
 | --- | --- |
@@ -15,11 +15,11 @@ El **Sprint 1** estableció la estructura móvil, navegación y reproducción de
 
 ## Sprint 3 · Trámites y administración
 
-El Sprint 3 añade catálogo demostrativo con audio asociado por trámite, acceso administrativo y backend opcional Express/PostgreSQL. Consulta [`docs/sprint-3-spec.md`](docs/sprint-3-spec.md) para el diagrama, inicializar la base de datos y crear la cuenta de administrador.
+El Sprint 3 añade catálogo demostrativo con audio asociado por trámite y acceso administrativo. La API Express/PostgreSQL está separada en [`backend/`](backend/), lista para alojarse como repositorio independiente.
 
 ## Sprint 4 · Fonoteca, buzón ciudadano y moderación
 
-Sprint 4 incorpora cargas privadas de audio, Fonoteca filtrable, envíos ciudadanos de audio/video con estado inicial pendiente y moderación autenticada. Ejecuta `npm run db:init` para aplicar las tablas y la migración de rol. Consulta la [especificación](docs/sprint-4-spec.md), el [informe de verificación y evidencias](docs/sprint-4-verification.md) y la [retrospectiva](docs/sprint-4-retrospective.md). Los archivos subidos se guardan en `private-media/`, fuera del contenido estático.
+Sprint 4 incorpora Fonoteca, buzón y moderación autenticada. Las fotos, audios y videos se almacenan en Cloudinary; las cargas ciudadanas quedan privadas hasta aprobarse. Configura Cloudinary y PostgreSQL en `backend/.env` (consulta [`backend/README.md`](backend/README.md)).
 
 ## Stack
 
@@ -29,9 +29,10 @@ Sprint 4 incorpora cargas privadas de audio, Fonoteca filtrable, envíos ciudada
 | Estilos | Tailwind CSS v4 con el plugin `@tailwindcss/vite` |
 | Iconos | lucide-react |
 | Lint | oxlint |
-| Audio | archivos Opus (preferido) y MP3 (respaldo) versionados en `public/audio/` |
+| API independiente | Express + PostgreSQL (`backend/`) |
+| Medios | Cloudinary para imágenes, audios y videos; Opus y MP3 locales para demos |
 
-Sin backend, sin base de datos y sin servicios externos: la versión del Sprint 1 funciona por completo de forma local.
+La interfaz conserva datos demostrativos para las vistas principales. Las cargas, sesiones y moderación requieren iniciar la API independiente.
 
 ## Requisitos
 
@@ -46,6 +47,8 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+Para iniciar la API, instala sus dependencias y configura `backend/.env` siguiendo [`backend/README.md`](backend/README.md). Después usa `npm run server` para la API y `npm run dev` para la interfaz. En producción configura `VITE_API_URL` si la API vive en otro host.
 
 Comandos adicionales:
 

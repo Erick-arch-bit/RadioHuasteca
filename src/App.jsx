@@ -1,17 +1,11 @@
-import { useCallback, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 import { Settings } from 'lucide-react'
 import { BulletinAudio } from './components/BulletinAudio'
-import { AdminView } from './components/AdminView'
-import { CitizenBoxView, FonotecaView } from './components/MediaViews'
 import { BulletinCard } from './components/BulletinCard'
-import { CapsuleCatalog } from './components/CapsuleCatalog'
 import { BottomNav } from './components/BottomNav'
-import { InnerView } from './components/InnerView'
 import { LanguageDraftNotice } from './components/LanguageDraftNotice'
 import { MobileMenu } from './components/MobileMenu'
-import { NoticeView } from './components/NoticeView'
 import { QuickNav } from './components/QuickNav'
-import { ProcedureView } from './components/ProcedureView'
 import { TopBar } from './components/TopBar'
 import { WelcomeBlock } from './components/WelcomeBlock'
 import { audioSources } from './data/bulletin'
@@ -19,6 +13,14 @@ import { findNavigationItem, homeItem } from './data/navigation'
 import { useBulletinAudio } from './hooks/useBulletinAudio'
 import { useNotices } from './hooks/useNotices'
 import { defaultLocale, getCopy, isDraftLocale } from './i18n/translations'
+
+const AdminView = lazy(() => import('./components/AdminView').then((module) => ({ default: module.AdminView })))
+const CapsuleCatalog = lazy(() => import('./components/CapsuleCatalog').then((module) => ({ default: module.CapsuleCatalog })))
+const CitizenBoxView = lazy(() => import('./components/MediaViews').then((module) => ({ default: module.CitizenBoxView })))
+const FonotecaView = lazy(() => import('./components/MediaViews').then((module) => ({ default: module.FonotecaView })))
+const InnerView = lazy(() => import('./components/InnerView').then((module) => ({ default: module.InnerView })))
+const NoticeView = lazy(() => import('./components/NoticeView').then((module) => ({ default: module.NoticeView })))
+const ProcedureView = lazy(() => import('./components/ProcedureView').then((module) => ({ default: module.ProcedureView })))
 
 // ---------------------------------------------------------------------------
 // RadioHuasteca · Estructura inicial del Sprint 1
@@ -36,7 +38,7 @@ function App() {
   const bulletinAudioRef = useRef(null)
   const capsuleAudioRef = useRef(null)
   const player = useBulletinAudio(bulletinAudioRef)
-  const notices = useNotices()
+  const notices = useNotices(activeView === 'avisos')
   const [activeCapsuleId, setActiveCapsuleId] = useState(null)
   const [capsuleState, setCapsuleState] = useState('idle')
   const [procedureViewKey, setProcedureViewKey] = useState(0)
@@ -140,12 +142,13 @@ function App() {
         onSelectLocale={setLocale}
         onToggleMenu={toggleMenu}
       >
-        {menuOpen ? <MobileMenu copy={copy} onClose={closeMenu} onSelect={goTo} /> : null}
+        {menuOpen ? <MobileMenu activeView={activeView} copy={copy} onClose={closeMenu} onSelect={goTo} /> : null}
       </TopBar>
 
       {isDraft ? <LanguageDraftNotice copy={copy} /> : null}
 
       <main className="mx-auto w-[min(100%-26px,980px)] pt-[42px] pb-[126px] desk:w-[min(100%-36px,980px)] desk:pt-[62px]">
+        <Suspense fallback={<p role="status" className="rounded-xl border border-line bg-paper p-4 text-sm text-muted">Cargando sección…</p>}>
         {isHome ? (
           <>
             <WelcomeBlock copy={copy} />
@@ -153,7 +156,7 @@ function App() {
             <QuickNav copy={copy} onSelect={goTo} />
           </>
         ) : activeView === 'avisos' ? (
-          <NoticeView copy={copy} notices={notices} onPlayAudio={playNoticeAudio} />
+          <NoticeView copy={copy} notices={notices} onGoAdmin={() => goTo('admin')} onPlayAudio={playNoticeAudio} />
         ) : activeView === 'capsulas' ? (
           <CapsuleCatalog
             copy={copy}
@@ -174,13 +177,14 @@ function App() {
         ) : (
           <InnerView copy={copy} item={currentItem} onGoHome={goHome} />
         )}
+        </Suspense>
       </main>
 
       <footer className="flex items-center justify-center gap-1.5 p-2.5 text-[10px] text-ink/50">
         <Settings size={13} aria-hidden="true" /> {copy.sprintNote}
       </footer>
 
-      <BottomNav copy={copy} activeView={activeView} onSelect={goTo} />
+      <BottomNav copy={copy} activeView={activeView} menuOpen={menuOpen} onSelect={goTo} onMore={toggleMenu} />
     </div>
   )
 }
