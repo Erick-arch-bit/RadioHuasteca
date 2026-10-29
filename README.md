@@ -21,17 +21,23 @@ El Sprint 3 añade catálogo demostrativo con audio asociado por trámite, acces
 
 Sprint 4 incorpora cargas privadas de audio, Fonoteca filtrable, envíos ciudadanos de audio/video con estado inicial pendiente y moderación autenticada. Ejecuta `npm run db:init` para aplicar las tablas y la migración de rol. Consulta la [especificación](docs/sprint-4-spec.md), el [informe de verificación y evidencias](docs/sprint-4-verification.md) y la [retrospectiva](docs/sprint-4-retrospective.md). Los archivos subidos se guardan en `private-media/`, fuera del contenido estático.
 
+## Sprint 5 · Estabilización
+
+El diagnóstico y el estado de las comprobaciones están en [especificación](docs/sprint-5-spec.md), [matriz de verificación](docs/sprint-5-verification.md), [rendimiento](docs/sprint-5-performance.md), [accesibilidad](docs/sprint-5-accessibility.md) e [incidencias](docs/sprint-5-incidents.md). `npm run verify:sprint5` ejecuta comprobaciones estáticas, lint y build. Las capturas y resultados que requieren navegador/servicios se marcan pendientes cuando no se ejecutan.
+
 ## Stack
 
 | Capa | Tecnología |
 | --- | --- |
 | Interfaz | React 19 + Vite 8 |
+| API | Express 5 |
+| Datos | PostgreSQL mediante `pg` |
 | Estilos | Tailwind CSS v4 con el plugin `@tailwindcss/vite` |
 | Iconos | lucide-react |
 | Lint | oxlint |
 | Audio | archivos Opus (preferido) y MP3 (respaldo) versionados en `public/audio/` |
 
-Sin backend, sin base de datos y sin servicios externos: la versión del Sprint 1 funciona por completo de forma local.
+La interfaz base funciona localmente. Los flujos de administración, avisos operativos, fonoteca, buzón y moderación dependen del backend Express y PostgreSQL.
 
 ## Requisitos
 
@@ -52,8 +58,17 @@ Comandos adicionales:
 ```bash
 npm run lint             # análisis estático (oxlint)
 npm run verify:sprint1   # verificación automática de los criterios del Sprint 1
+npm run verify:sprint2   # inicia npm run dev antes; pruebas de interfaz con Chrome
+npm run verify:sprint3   # requiere servidor web, API, PostgreSQL, cuenta y Chrome
+npm run verify:sprint5   # estáticas, lint y build
 npm run audio:generate   # regenera el audio de prueba del boletín
 ```
+
+## Operación del backend
+
+Configura `DATABASE_URL` y `SESSION_SECRET` (mínimo 32 caracteres) en `.env`; no compartas ese archivo. Para crear un operador, define temporalmente `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_NAME` y `ADMIN_PASSWORD` en el entorno y ejecuta `npm run admin:create`. Inicializa con `npm run db:init`, luego inicia `npm run server` y `npm run dev`. En producción sirve bajo HTTPS: la cookie de sesión se emite con HttpOnly, SameSite=Strict y Secure. Los archivos ciudadanos viven en `private-media/`; respalda ese directorio junto con PostgreSQL mediante un procedimiento operativo controlado. No publiques esa carpeta ni la copies a artefactos públicos.
+
+**Limitación de Sprint 5:** los avisos administrativos siguen siendo una demostración local de Sprint 2 en `localStorage`; no son persistentes entre dispositivos ni están protegidos por autenticación. No uses esa interfaz para publicar avisos operativos. La migración a avisos compartidos requiere una tabla y CRUD autenticado, y está registrada como incidencia abierta.
 
 ## Estructura del proyecto
 

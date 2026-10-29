@@ -15,6 +15,8 @@
     "verify:sprint1": "node scripts/verify-sprint-1.mjs",
     "verify:sprint2": "node scripts/verify-sprint-2.mjs",
     "verify:sprint3": "node scripts/verify-sprint-3.mjs",
+    "verify:sprint5": "node scripts/verify-sprint-5.mjs",
+    "evidence:sprint4": "node scripts/capture-sprint-4-evidence.mjs",
     "audio:generate": "bash scripts/generate-bulletin-audio.sh"
   },
   "dependencies": {

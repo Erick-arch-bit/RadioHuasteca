@@ -15,7 +15,7 @@ Alcance de esta revisión: compilación, lint, migración PostgreSQL, disponibil
 | `npm run build` | PASS | Vite compiló la aplicación de producción. |
 | `npm run lint` | PASS | Oxlint terminó sin advertencias. |
 | `node --check server/index.js` | PASS | Sintaxis válida. |
-| Carga de audio real, envío ciudadano de audio/video y decisión de moderación | PENDIENTE DE EVIDENCIA MANUAL | Requiere medios de prueba y una cuenta operadora local. Seguir los pasos de abajo. |
+| Flujo local de carga, envío y moderación con medios de prueba | PASS | Cuenta local: cargó un MP3 de muestra de 38 s y generó un MP4 de prueba de 3 s; envío, rechazo de texto, estados, historial y publicación aprobada se capturaron en los PNG de abajo. |
 
 ## Matriz de demostración manual
 
@@ -30,4 +30,14 @@ Con PostgreSQL configurado, ejecuta `npm run db:init`, inicia `npm run server` y
 
 ## Archivos de evidencia
 
-Guardar las capturas y videos de ejecución en `docs/evidence/sprint-4/` y anotar aquí el nombre de cada archivo, dispositivo/resolución y resultado. La carpeta queda preparada para incorporar los artefactos de la demostración real.
+Con PostgreSQL, `npm run server` y `npm run dev` activos, ejecuta `npm run evidence:sprint4`. Ejecutado el 14 de octubre de 2026: el capturador usó la cuenta local de `.env`, un MP3 de muestra de 38 s y un MP4 temporal generado localmente de 3 s. Comprobó confirmación del buzón, rechazo de un archivo de texto, registro como pendiente, aprobación/rechazo, historial y publicación del aprobado. Limpió filas y medios temporales de la base al terminar. Capturas en viewport móvil de 390 × 844 px (las pantallas largas de moderación usan captura completa):
+
+- `01-fonoteca-audio-seleccionado.png` y `08-fonoteca-audio-reproduciendo.png`: filtro, ficha y reproducción.
+- `02-buzon-ciudadano-movil.png`, `03-buzon-archivo-invalido.png` y `04-buzon-confirmacion-envio.png`: formulario móvil, rechazo y confirmación.
+- `05-moderacion-pendientes-audio-video.png` y `06-moderacion-aprobado-rechazado.png`: pendientes y decisiones.
+- `07-fonoteca-contenido-ciudadano-aprobado.png`: publicación del contenido aprobado.
+- `09-admin-carga-audio-confirmacion.png`: carga desde el formulario autenticado del operador y confirmación.
+
+El flujo completo está automatizado con muestras locales; todavía se debe repetir con un teléfono real y medios aportados por la comunidad antes de aceptar el producto en su entorno de operación.
+
+Las capturas y videos de una demostración hecha en teléfono real pueden agregarse a la misma carpeta con su dispositivo/resolución y resultado anotados aquí.
