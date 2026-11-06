@@ -89,9 +89,9 @@ export const adminRoutes = new Elysia({ prefix: '/api' })
     if (!body.file.type.startsWith('audio/')) { set.status = 400; return { message: 'Fonoteca solo acepta archivos de audio.' } }
     const asset = await uploadToCloudinary(await body.file.arrayBuffer(), 'video')
     const [capsule] = await sql`
-      INSERT INTO capsules (title, description, audio_url, audio_public_id, duration_seconds)
+      INSERT INTO capsules (title, description, audio_url, audio_public_id, duration_seconds, category, language)
       VALUES (${body.title.trim()}, ${(body.description ?? '').slice(0, 5000)}, ${asset.url},
-        ${asset.publicId}, ${Math.round(Number(body.duration))})
+        ${asset.publicId}, ${Math.round(Number(body.duration))}, ${body.category?.trim() || 'Comunidad'}, ${body.language?.trim() || 'Español'})
       RETURNING id
     `
     return { id: capsule.id, message: 'Audio cargado correctamente.' }

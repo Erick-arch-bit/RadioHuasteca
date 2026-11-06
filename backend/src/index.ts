@@ -5,6 +5,7 @@ import { adminRoutes } from './routes/admin'
 import { catalogRoutes } from './routes/catalog'
 import { mediaRoutes } from './routes/media'
 import { noticeRoutes } from './routes/notices'
+import { submissionRoutes } from './routes/submissions'
 
 const port = Number(process.env.PORT ?? 3001)
 const frontendOrigin = process.env.FRONTEND_ORIGIN
@@ -19,6 +20,7 @@ const app = new Elysia()
   .get('/api/health', () => ({ status: 'ok' }))
   .use(mediaRoutes)
   .use(noticeRoutes)
+  .use(submissionRoutes)
   .use(catalogRoutes)
   .use(adminRoutes)
   .onError(({ code, error, set }) => {

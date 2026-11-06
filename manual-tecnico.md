@@ -30,7 +30,7 @@ El cliente lee `VITE_API_URL` al compilar. Si está vacío, usa rutas relativas 
 
 ### Reproductores
 
-El reproductor del boletín vive en `App` y se apoya en `src/hooks/useBulletinAudio.js`. Mantiene estados `idle`, `loading`, `playing`, `paused` y `error`, y usa eventos del elemento HTML `<audio>` para actualizar duración y progreso. El catálogo de cápsulas de demostración está en `src/data/notices.js`; los reproductores usan otro elemento `<audio>` montado por `App`.
+El reproductor del boletín vive en `App` y se apoya en `src/hooks/useBulletinAudio.js`. Mantiene estados `idle`, `loading`, `playing`, `paused` y `error`, y usa eventos del elemento HTML `<audio>` para actualizar duración y progreso. El catálogo de cápsulas consulta `GET /api/audios`; el reproductor compartido usa otro elemento `<audio>` montado por `App`.
 
 ### Avisos en el cliente
 
@@ -38,7 +38,7 @@ El reproductor del boletín vive en `App` y se apoya en `src/hooks/useBulletinAu
 
 ### Trámites y multimedia
 
-`src/components/ProcedureView.jsx` inicia con `src/data/procedures.js` y reemplaza la lista si `GET /api/procedures` devuelve filas. Algunos campos de la respuesta API se adaptan a la vista; otros, como pasos y datos de audio traducidos, pueden no estar incluidos por el SQL actual. Fonoteca obtiene `GET /api/audios` y `GET /api/published-submissions`; el primero existe y el segundo devuelve una lista vacía constante en el estado actual. El reproductor de fonoteca usa `/api/media/:id`, que redirige a la URL de Cloudinary almacenada en la fila de cápsula.
+`src/components/ProcedureView.jsx` inicia con `src/data/procedures.js` y reemplaza la lista si `GET /api/procedures` devuelve filas. Algunos campos de la respuesta API se adaptan a la vista; otros, como pasos y datos de audio traducidos, pueden no estar incluidos por el SQL actual. Fonoteca obtiene `GET /api/audios` y `GET /api/published-submissions`; el segundo devuelve los contenidos ciudadanos aprobados. El reproductor de fonoteca usa `/api/media/:id`, que redirige a la URL pública correspondiente.
 
 ## 4. Ejecución local
 
@@ -85,7 +85,7 @@ Base local: `http://localhost:3001`. Las respuestas de aplicación son JSON salv
 | `GET` | `/api/health` | Comprobación de salud; público. |
 | `GET` | `/api/procedures` | Lista trámites ordenados por prioridad y nombre; consulta PostgreSQL. |
 | `GET` | `/api/audios` | Lista cápsulas de la tabla `capsules`; público. |
-| `GET` | `/api/published-submissions` | En el código actual devuelve `[]`; no hay entidad/ruta de envíos implementada. |
+| `GET` | `/api/published-submissions` | Lista contenido ciudadano aprobado; público. |
 | `GET` | `/api/media/:id` | Busca URL de cápsula por ID y responde con redirección 302; devuelve 404 si no existe. |
 | `GET` | `/api/notices/` | Lista avisos de PostgreSQL; público. |
 | `POST` | `/api/notices/` | Crea aviso si hay sesión administrativa válida. |
@@ -98,8 +98,13 @@ Base local: `http://localhost:3001`. Las respuestas de aplicación son JSON salv
 | `POST` | `/api/admin/notices` | Crea aviso; requiere administrador. |
 | `PATCH` | `/api/admin/notices/:id` | Actualiza aviso; requiere administrador. |
 | `POST` | `/api/audios` | Carga audio a Cloudinary e inserta cápsula; requiere administrador. Campos multipart: `file`, `title`, `duration`, y opcionales `category`, `language`, `description`. |
+| `POST` | `/api/citizen-submissions` | Guarda audio, imagen o video comunitario como pendiente; público. |
+| `GET` | `/api/admin/submissions` | Lista envíos para moderación; requiere administrador. |
+| `GET` | `/api/admin/submissions/:id/media` | Previsualiza el medio privado; requiere administrador. |
+| `GET` | `/api/admin/submissions/:id/history` | Consulta historial de revisión; requiere administrador. |
+| `PATCH` | `/api/admin/submissions/:id` | Aprueba o rechaza un envío; requiere administrador. Aprobar audio crea una cápsula pública. |
 
-El handler frontend espera algunas rutas que no están registradas en esta API: `POST /api/citizen-submissions`, `/api/admin/submissions` y rutas relacionadas con revisión/historial/descarga privada. No debe documentarse el buzón como persistencia funcional completa hasta implementar y conectar ese flujo.
+El buzón usa `POST /api/citizen-submissions` para guardar envíos privados pendientes. La moderación administrativa consulta `GET /api/admin/submissions`, previsualiza medios mediante `GET /api/admin/submissions/:id/media`, y revisa o decide mediante `PATCH /api/admin/submissions/:id`. El historial está en `GET /api/admin/submissions/:id/history`. Aprobar un audio lo vuelve público y crea una fila en `capsules`; aprobar imagen o video lo publica en la Fonoteca. Rechazarlo no lo publica.
 
 ## 7. Base de datos y almacenamiento
 
@@ -108,6 +113,8 @@ El handler frontend espera algunas rutas que no están registradas en esta API: 
 - `admins`: identidad, correo único y hash de contraseña.
 - `notices`: contenido, prioridad/estado, enlaces opcionales a medios, creador y fecha.
 - `capsules`: título, descripción, URL/public ID de audio, duración y fecha.
+- `citizen_submissions`: metadatos, estado de revisión y referencia del archivo comunitario. Los archivos pendientes se suben a Cloudinary como autenticados.
+- `submission_review_history`: historial de decisiones de moderación.
 - `procedures`: nombre, descripción, requisitos, audio y prioridad.
 
 `bun run db:init` ejecuta el archivo SQL. El esquema inserta filas de demostración en avisos y cápsulas. `bun run admin:create` crea un administrador desde variables de entorno y guarda un hash bcrypt compatible con `pgcrypto`. La llamada no es idempotente si username/email ya existen.

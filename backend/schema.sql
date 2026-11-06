@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS capsules (
   audio_url TEXT NOT NULL,
   audio_public_id TEXT,
   duration_seconds INT,
+  category VARCHAR(100) NOT NULL DEFAULT 'Comunidad',
+  language VARCHAR(100) NOT NULL DEFAULT 'Español',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -42,9 +44,39 @@ CREATE TABLE IF NOT EXISTS procedures (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS citizen_submissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('audio', 'image', 'video')),
+  mime_type VARCHAR(100) NOT NULL,
+  public_id TEXT NOT NULL,
+  file_size BIGINT NOT NULL,
+  contact VARCHAR(160),
+  status VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE' CHECK (status IN ('PENDIENTE', 'APROBADO', 'RECHAZADO')),
+  title VARCHAR(150),
+  category VARCHAR(100) NOT NULL DEFAULT 'Comunidad',
+  language VARCHAR(100) NOT NULL DEFAULT 'Español',
+  description TEXT,
+  capsule_id UUID REFERENCES capsules(id),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  reviewed_at TIMESTAMP,
+  reviewed_by UUID REFERENCES admins(id),
+  review_note TEXT
+);
+
+CREATE TABLE IF NOT EXISTS submission_review_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  submission_id UUID NOT NULL REFERENCES citizen_submissions(id) ON DELETE CASCADE,
+  admin_id UUID REFERENCES admins(id),
+  status VARCHAR(20) NOT NULL,
+  note TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 ALTER TABLE notices ADD COLUMN IF NOT EXISTS audio_public_id TEXT;
 ALTER TABLE notices ADD COLUMN IF NOT EXISTS image_public_id TEXT;
 ALTER TABLE capsules ADD COLUMN IF NOT EXISTS audio_public_id TEXT;
+ALTER TABLE capsules ADD COLUMN IF NOT EXISTS category VARCHAR(100) NOT NULL DEFAULT 'Comunidad';
+ALTER TABLE capsules ADD COLUMN IF NOT EXISTS language VARCHAR(100) NOT NULL DEFAULT 'Español';
 
 INSERT INTO notices (title, summary, priority, status) VALUES
   ('Reunión comunitaria', 'Este sábado a las 10am en la plaza principal', 'urgent', 'active'),

@@ -1,15 +1,44 @@
 import { Pause, Play, Radio, Square } from 'lucide-react'
-import { capsuleItems } from '../data/notices'
+import { useEffect, useState } from 'react'
+
+const API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '')
 
 export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause, onStop }) {
+  const [capsules, setCapsules] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`${API}/api/audios`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error('No se pudo cargar el catálogo de cápsulas.')
+        return response.json()
+      })
+      .then((items) => {
+        if (cancelled) return
+        setCapsules(items.map((item) => ({
+          ...item,
+          duration: `${String(Math.floor((item.duration_seconds ?? 0) / 60)).padStart(2, '0')}:${String((item.duration_seconds ?? 0) % 60).padStart(2, '0')}`,
+          size: item.file_size ? `${Math.round(item.file_size / 1024)} KB` : '',
+          src: [{ src: `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
+        })))
+      })
+      .catch((reason) => { if (!cancelled) setError(reason.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
   return (
     <section data-testid="capsules-view" data-check-overflow className="animate-reveal">
       <span className="text-[10px] font-extrabold uppercase tracking-[.11em] text-clay">RadioHuasteca · Sprint 2</span>
       <h1 className="mt-2 font-serif text-[clamp(32px,8vw,48px)] leading-tight text-ink">{copy.capsulesTitle}</h1>
       <p className="mt-2 mb-6 text-sm text-muted">{copy.capsulesIntro}</p>
-      <p className="mb-4 rounded border border-line bg-paper/70 p-3 text-xs leading-relaxed text-muted">{copy.capsuleDemoNotice}</p>
+      {loading ? <p role="status" className="rounded border border-line bg-paper p-4 text-sm text-muted">Cargando cápsulas…</p> : null}
+      {error ? <p role="alert" className="rounded border border-line bg-paper p-4 text-sm text-muted">{error}</p> : null}
+      {!loading && !error && capsules.length === 0 ? <p className="rounded border border-line bg-paper p-4 text-sm text-muted">Todavía no hay cápsulas publicadas.</p> : null}
       <div className="grid gap-3">
-        {capsuleItems.map((capsule) => {
+        {capsules.map((capsule) => {
           const selected = activeId === capsule.id
           const playing = selected && playbackState === 'playing'
           return <article key={capsule.id} data-testid="capsule-card" className="rounded-lg border border-line bg-paper p-4">
@@ -18,7 +47,7 @@ export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause,
               <div className="min-w-0 flex-1">
                 <h2 className="break-words font-serif text-lg leading-snug text-ink">{capsule.title}</h2>
                 <p className="mt-1 text-xs text-muted">{capsule.category} · {capsule.language} · {capsule.duration}</p>
-                <p className="mt-1 text-[11px] text-muted">{capsule.src[0].type.includes('mpeg') ? 'MP3 · 48 kbps' : copy.capsuleFormat} · {capsule.size}</p>
+                {capsule.size ? <p className="mt-1 text-[11px] text-muted">{capsule.size}</p> : null}
               </div>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-2">
