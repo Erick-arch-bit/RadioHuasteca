@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "bun build src/index.ts --target bun --outdir dist",
     "start": "bun run src/index.ts",
     "dev": "bun --watch src/index.ts",
     "db:init": "bun run src/init-db.ts",
