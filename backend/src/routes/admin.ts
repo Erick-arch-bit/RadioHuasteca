@@ -54,7 +54,7 @@ export const adminRoutes = new Elysia({ prefix: '/api' })
   .get('/admin/notices', async ({ headers, set }) => {
     const admin = await requireAdmin(headers, set)
     if (!admin) return { message: 'Inicia sesión para continuar.' }
-    return sql`SELECT id, title, summary AS description, priority, status, audio_url AS "mediaUrl", image_url AS "imageUrl", created_at AS date FROM notices ORDER BY created_at DESC`
+    return sql`SELECT id, title, summary AS description, priority, status, audio_url AS "mediaUrl", image_url AS "imageUrl", to_char(created_at, 'YYYY-MM-DD') AS date FROM notices ORDER BY created_at DESC`
   })
   .post('/admin/notices', async ({ body, headers, set }) => {
     const admin = await requireAdmin(headers, set)

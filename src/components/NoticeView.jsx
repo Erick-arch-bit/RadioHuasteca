@@ -5,7 +5,12 @@ const statuses = ['active', 'scheduled', 'resolved']
 const typeIcons = { weather: CloudSun, water: Droplets, health: HeartPulse, community: Megaphone }
 
 function formatDate(date) {
-  return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`))
+  const value = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ? `${date}T12:00:00Z`
+    : date
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return 'Fecha no disponible'
+  return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(parsed)
 }
 
 export function NoticeView({ copy, notices, onPlayAudio, onGoAdmin }) {

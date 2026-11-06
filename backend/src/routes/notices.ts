@@ -18,7 +18,7 @@ function presentNotice(notice: Record<string, unknown>) {
   return {
     ...notice,
     description: notice.summary,
-    date: notice.created_at,
+    date: notice.date ?? notice.created_at,
     type: 'community',
     audio: notice.audio_url ? [{ src: notice.audio_url }] : undefined,
   }
@@ -27,7 +27,7 @@ function presentNotice(notice: Record<string, unknown>) {
 export const noticeRoutes = new Elysia({ prefix: '/api/notices' })
   .get('/', async () => (await sql`
     SELECT id, title, summary, priority, status, audio_url, audio_public_id,
-      image_url, image_public_id, created_at
+      image_url, image_public_id, to_char(created_at, 'YYYY-MM-DD') AS date
     FROM notices ORDER BY created_at DESC
   `).map(presentNotice))
   .post('/', async ({ body, headers, set }) => {
