@@ -3,6 +3,7 @@ const API_URL = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '')
 export async function apiClient(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: options.credentials ?? 'include',
     headers: options.body instanceof FormData
       ? options.headers
       : { 'Content-Type': 'application/json', ...options.headers },

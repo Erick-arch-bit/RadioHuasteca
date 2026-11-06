@@ -2,12 +2,10 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { sql } from './db'
 
 const secret = process.env.SESSION_SECRET
-if (!secret || secret.length < 32) {
-  throw new Error('Define SESSION_SECRET con al menos 32 caracteres.')
-}
+if (!secret || secret.length < 32) throw new Error('Define SESSION_SECRET con al menos 32 caracteres.')
 const sessionSecret: string = secret
 
-export type AdminSession = { id: number; username: string; displayName: string; exp: number }
+export type AdminSession = { id: string; username: string; displayName: string; exp: number }
 
 export function signSession(payload: Omit<AdminSession, 'exp'>) {
   const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + 8 * 60 * 60 * 1000 })).toString('base64url')
@@ -33,8 +31,8 @@ export function getSession(cookie?: string): AdminSession | null {
 export async function getAdmin(headers: Record<string, string | undefined>) {
   const session = getSession(headers.cookie)
   if (!session) return null
-  const [admin] = await sql`SELECT id, username, display_name AS "displayName", role FROM admin_users WHERE id = ${session.id}`
-  return admin ? { ...session, role: admin.role as string } : null
+  const [admin] = await sql`SELECT id, username, email FROM admins WHERE id = ${session.id}`
+  return admin ? { ...session, role: 'operator' } : null
 }
 
 export const clearSessionCookie = 'rh_admin=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'

@@ -1,41 +1,46 @@
 import { Elysia, t } from 'elysia'
+import { getAdmin } from '../auth'
 import { sql } from '../db'
 
 const noticeBody = t.Object({
-  title: t.String({ minLength: 1, maxLength: 90 }),
-  description: t.String({ minLength: 1, maxLength: 2000 }),
-  priority: t.Union([t.Literal('urgent'), t.Literal('high'), t.Literal('normal')]),
-  type: t.Union([t.Literal('weather'), t.Literal('water'), t.Literal('health'), t.Literal('community')]),
-  date: t.String({ pattern: '^\\d{4}-\\d{2}-\\d{2}$' }),
-  status: t.Union([t.Literal('active'), t.Literal('scheduled'), t.Literal('resolved')]),
-  mediaUrl: t.Optional(t.String()),
-  mediaPublicId: t.Optional(t.String()),
+  title: t.String({ minLength: 1, maxLength: 150 }),
+  description: t.Optional(t.String({ maxLength: 5000 })),
+  summary: t.Optional(t.String({ maxLength: 5000 })),
+  priority: t.Optional(t.String({ maxLength: 20 })),
+  status: t.Optional(t.String({ maxLength: 20 })),
+  mediaUrl: t.Optional(t.Union([t.String(), t.Null()])),
+  mediaPublicId: t.Optional(t.Union([t.String(), t.Null()])),
+  imageUrl: t.Optional(t.Union([t.String(), t.Null()])),
+  imagePublicId: t.Optional(t.Union([t.String(), t.Null()])),
 })
 
+function presentNotice(notice: Record<string, unknown>) {
+  return {
+    ...notice,
+    description: notice.summary,
+    date: notice.created_at,
+    type: 'community',
+    audio: notice.audio_url ? [{ src: notice.audio_url }] : undefined,
+  }
+}
+
 export const noticeRoutes = new Elysia({ prefix: '/api/notices' })
-  .get('/', async () => {
-    const rows = await sql`
-      SELECT id, title, description, priority, type,
-        to_char(notice_date, 'YYYY-MM-DD') AS date, status,
-        media_url AS "mediaUrl", media_public_id AS "mediaPublicId"
-      FROM community_notices
-      ORDER BY notice_date DESC, created_at DESC
-    `
-    return rows.map((notice) => ({
-      ...notice,
-      id: `community-${notice.id}`,
-      ...(notice.mediaUrl ? { audio: [{ src: notice.mediaUrl }] } : {}),
-    }))
-  })
-  .post('/', async ({ body, set }) => {
+  .get('/', async () => (await sql`
+    SELECT id, title, summary, priority, status, audio_url, audio_public_id,
+      image_url, image_public_id, created_at
+    FROM notices ORDER BY created_at DESC
+  `).map(presentNotice))
+  .post('/', async ({ body, headers, set }) => {
+    const admin = await getAdmin(headers)
+    if (!admin) { set.status = 401; return { message: 'Inicia sesión para continuar.' } }
     const [notice] = await sql`
-      INSERT INTO community_notices
-        (title, description, priority, type, notice_date, status, media_url, media_public_id)
-      VALUES
-        (${body.title.trim()}, ${body.description.trim()}, ${body.priority}, ${body.type},
-         ${body.date}, ${body.status}, ${body.mediaUrl ?? null}, ${body.mediaPublicId ?? null})
+      INSERT INTO notices (title, summary, priority, status, audio_url, audio_public_id,
+        image_url, image_public_id, created_by)
+      VALUES (${body.title.trim()}, ${body.summary ?? body.description ?? null}, ${body.priority ?? 'normal'},
+        ${body.status ?? 'active'}, ${body.mediaUrl ?? null}, ${body.mediaPublicId ?? null},
+        ${body.imageUrl ?? null}, ${body.imagePublicId ?? null}, ${admin.id})
       RETURNING id
     `
     set.status = 201
-    return { id: `community-${notice.id}`, message: 'Aviso guardado.' }
+    return { id: notice.id, message: 'Aviso guardado.' }
   }, { body: noticeBody })
