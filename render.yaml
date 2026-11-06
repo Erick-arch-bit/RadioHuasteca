@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: radiohuasteca-api
+    runtime: node
+    rootDir: backend
+    buildCommand: curl -fsSL https://bun.sh/install | bash && export PATH="$HOME/.bun/bin:$PATH" && bun install --frozen-lockfile
+    preDeployCommand: export PATH="$HOME/.bun/bin:$PATH" && bun run db:init
+    startCommand: export PATH="$HOME/.bun/bin:$PATH" && bun run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: require
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

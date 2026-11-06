@@ -7,7 +7,11 @@ import { mediaRoutes } from './routes/media'
 import { noticeRoutes } from './routes/notices'
 
 const port = Number(process.env.PORT ?? 3001)
-const allowedOrigin = process.env.FRONTEND_ORIGIN ?? true
+const frontendOrigin = process.env.FRONTEND_ORIGIN
+if (process.env.NODE_ENV === 'production' && !frontendOrigin) {
+  throw new Error('Define FRONTEND_ORIGIN en producción.')
+}
+const allowedOrigin = frontendOrigin ?? true
 
 const app = new Elysia()
   .use(cors({ origin: allowedOrigin, credentials: true }))
