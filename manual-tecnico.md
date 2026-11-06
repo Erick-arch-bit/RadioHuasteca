@@ -101,6 +101,7 @@ Base local: `http://localhost:3001`. Las respuestas de aplicación son JSON salv
 | `POST` | `/api/citizen-submissions` | Guarda audio, imagen o video comunitario como pendiente; público. |
 | `GET` | `/api/admin/submissions` | Lista envíos para moderación; requiere administrador. |
 | `GET` | `/api/admin/submissions/:id/media` | Previsualiza el medio privado; requiere administrador. |
+| `GET` | `/api/admin/submissions/:id/media-url` | Emite una URL temporal firmada para previsualizar desde el navegador; requiere administrador. |
 | `GET` | `/api/admin/submissions/:id/history` | Consulta historial de revisión; requiere administrador. |
 | `PATCH` | `/api/admin/submissions/:id` | Aprueba o rechaza un envío; requiere administrador. Aprobar audio crea una cápsula pública. |
 

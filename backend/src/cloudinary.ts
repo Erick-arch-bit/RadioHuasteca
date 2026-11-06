@@ -42,7 +42,12 @@ export async function uploadToCloudinary(
         : undefined,
   })
 
-  return { url, publicId: result.public_id, resourceType: actualResourceType }
+  return {
+    url,
+    publicId: result.public_id,
+    resourceType: actualResourceType,
+    durationSeconds: result.duration ? Math.round(result.duration) : null,
+  }
 }
 
 export function getCloudinaryUrl(

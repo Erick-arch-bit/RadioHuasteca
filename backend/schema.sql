@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS citizen_submissions (
   mime_type VARCHAR(100) NOT NULL,
   public_id TEXT NOT NULL,
   file_size BIGINT NOT NULL,
+  duration_seconds INT,
   contact VARCHAR(160),
   status VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE' CHECK (status IN ('PENDIENTE', 'APROBADO', 'RECHAZADO')),
   title VARCHAR(150),
@@ -77,6 +78,7 @@ ALTER TABLE notices ADD COLUMN IF NOT EXISTS image_public_id TEXT;
 ALTER TABLE capsules ADD COLUMN IF NOT EXISTS audio_public_id TEXT;
 ALTER TABLE capsules ADD COLUMN IF NOT EXISTS category VARCHAR(100) NOT NULL DEFAULT 'Comunidad';
 ALTER TABLE capsules ADD COLUMN IF NOT EXISTS language VARCHAR(100) NOT NULL DEFAULT 'Español';
+ALTER TABLE citizen_submissions ADD COLUMN IF NOT EXISTS duration_seconds INT;
 
 INSERT INTO notices (title, summary, priority, status) VALUES
   ('Reunión comunitaria', 'Este sábado a las 10am en la plaza principal', 'urgent', 'active'),
