@@ -15,7 +15,7 @@ El **Sprint 1** estableció la estructura móvil, navegación y reproducción de
 
 ## Sprint 3 · Trámites y administración
 
-El Sprint 3 añade catálogo demostrativo con audio asociado por trámite y acceso administrativo. La API Express/PostgreSQL está incluida en [`backend/`](backend/) y se ejecuta junto con la interfaz desde este repositorio.
+El Sprint 3 añade catálogo demostrativo con audio asociado por trámite y acceso administrativo. La API independiente Bun/Elysia/PostgreSQL está incluida en [`backend/`](backend/) y se ejecuta junto con la interfaz desde este repositorio.
 
 ## Sprint 4 · Fonoteca, buzón ciudadano y moderación
 
@@ -29,7 +29,7 @@ Sprint 4 incorpora Fonoteca, buzón y moderación autenticada. Las fotos, audios
 | Estilos | Tailwind CSS v4 con el plugin `@tailwindcss/vite` |
 | Iconos | lucide-react |
 | Lint | oxlint |
-| API independiente | Express + PostgreSQL (`backend/`) |
+| API independiente | Bun + Elysia + PostgreSQL (`backend/`) |
 | Medios | Cloudinary para imágenes, audios y videos; Opus y MP3 locales para demos |
 
 La interfaz conserva datos demostrativos para las vistas principales. Las cargas, sesiones y moderación requieren iniciar la API independiente.
@@ -48,14 +48,12 @@ npm run build
 npm run preview
 ```
 
-Para iniciar la API, instala sus dependencias y configura `backend/.env` siguiendo [`backend/README.md`](backend/README.md). Después usa `npm run server` para la API y `npm run dev` para la interfaz. En producción configura `VITE_API_URL` si la API vive en otro host.
+Para iniciar la API, instala sus dependencias con `bun install` dentro de [`backend/`](backend/), configura `backend/.env` siguiendo [`backend/README.md`](backend/README.md) y ejecuta `bun run dev`. Usa `npm run dev` para la interfaz. En producción configura `VITE_API_URL` si la API vive en otro host.
 
 Comandos adicionales:
 
 ```bash
 npm run lint             # análisis estático (oxlint)
-npm run verify:sprint1   # verificación automática de los criterios del Sprint 1
-npm run audio:generate   # regenera el audio de prueba del boletín
 ```
 
 ## Estructura del proyecto
@@ -211,7 +209,7 @@ Si `chromium` no está disponible, las pruebas de interfaz se omiten (se muestra
 | HU-13 | Estructura bilingüe | Diccionarios ES / Hñähñu con aviso de traducción pendiente de validación |
 | Técnica | Repositorio | React + Vite + Tailwind CSS, README, `npm run build` y verificación automática |
 
-**Fuera de alcance actual** (para sprints posteriores): trámites con apoyo auditivo, inicio de sesión, administración autenticada, buzón ciudadano, backend Node/Express y base de datos PostgreSQL.
+Los trámites, la administración autenticada, el buzón ciudadano y la base de datos PostgreSQL están implementados en la API Bun/Elysia de [`backend/`](backend/).
 
 ## Sprint 2: avisos comunitarios y cápsulas
 

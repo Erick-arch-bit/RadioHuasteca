@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Pencil, Plus, X } from 'lucide-react'
+import { getNotices, createNotice } from '../services/noticeService'
+import { uploadMedia } from '../services/mediaService'
 
 const API = import.meta.env?.VITE_API_URL ?? ''
-const blank = () => ({ title: '', description: '', priority: 'normal', type: 'community', date: new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()), status: 'active', audioId: '' })
+const blank = () => ({ title: '', description: '', priority: 'normal', type: 'community', date: new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()), status: 'active', audioId: '', mediaUrl: '', mediaPublicId: '' })
 const field = 'mt-1 block min-h-11 w-full rounded-lg border border-line bg-white px-3 text-sm font-normal'
 
 export function NoticeManagement() {
   const [items, setItems] = useState([])
   const [audios, setAudios] = useState([])
   const [form, setForm] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
 
   async function load() {
-    const [noticeResponse, audioResponse] = await Promise.all([
-      fetch(`${API}/api/admin/notices`, { credentials: 'include' }),
-      fetch(`${API}/api/audios`),
-    ])
-    if (!noticeResponse.ok) throw new Error('No se pudieron cargar los avisos. Inicia sesión de nuevo si hace falta.')
-    setItems(await noticeResponse.json())
+    const [notices, audioResponse] = await Promise.all([getNotices(), fetch(`${API}/api/audios`)])
+    setItems(notices)
     if (audioResponse.ok) setAudios(await audioResponse.json())
   }
 
@@ -26,7 +25,8 @@ export function NoticeManagement() {
   useEffect(() => { load().catch((error) => setMessage(error.message)) }, [])
 
   function edit(item) {
-    setForm({ id: item.id, title: item.title, description: item.description, priority: item.priority, type: item.type, date: item.date, status: item.status, audioId: item.audio_id ?? '' })
+    setForm({ id: item.id, title: item.title, description: item.description, priority: item.priority, type: item.type, date: item.date, status: item.status, audioId: item.audio_id ?? '', mediaUrl: item.mediaUrl ?? '', mediaPublicId: item.mediaPublicId ?? '' })
+    setSelectedFile(null)
     setMessage('')
   }
 
@@ -34,14 +34,25 @@ export function NoticeManagement() {
     event.preventDefault()
     setBusy(true)
     setMessage('')
-    const payload = { ...form, audioId: form.audioId || null }
-    const isEditing = Boolean(form.id)
-    const url = isEditing ? `${API}/api/admin/notices/${form.id.replace('community-', '')}` : `${API}/api/admin/notices`
     try {
-      const response = await fetch(url, { method: isEditing ? 'PATCH' : 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.message || 'No se pudo guardar el aviso.')
+      const uploadedMedia = selectedFile ? await uploadMedia(selectedFile) : {}
+      const payload = {
+        ...form,
+        audioId: form.audioId || null,
+        mediaUrl: uploadedMedia.url ?? form.mediaUrl ?? null,
+        mediaPublicId: uploadedMedia.publicId ?? form.mediaPublicId ?? null,
+      }
+      const isEditing = Boolean(form.id)
+      const url = isEditing ? `${API}/api/admin/notices/${form.id.replace('community-', '')}` : `${API}/api/admin/notices`
+      const result = isEditing
+        ? await fetch(url, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(async (response) => {
+          const data = await response.json()
+          if (!response.ok) throw new Error(data.message || 'No se pudo guardar el aviso.')
+          return data
+        })
+        : await createNotice(payload)
       setForm(null)
+      setSelectedFile(null)
       setMessage(result.message)
       window.dispatchEvent(new Event('radiohuasteca:notices-updated'))
       await load()
@@ -70,7 +81,7 @@ export function NoticeManagement() {
         <label className="text-sm font-bold text-ink">Fecha<input className={field} type="date" required value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label>
         <label className="text-sm font-bold text-ink">Estado<select className={field} value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option value="active">Activo</option><option value="scheduled">Programado</option><option value="resolved">Resuelto</option></select></label>
       </div>
-      <label className="text-sm font-bold text-ink">Audio opcional<select className={field} value={form.audioId} onChange={(event) => setForm({ ...form, audioId: event.target.value })}><option value="">Sin audio</option>{audios.map((audio) => <option key={audio.id} value={audio.id}>{audio.title}</option>)}</select></label>
+      <label className="text-sm font-bold text-ink">Audio opcional<select className={field} value={form.audioId} onChange={(event) => setForm({ ...form, audioId: event.target.value })}><option value="">Sin audio</option>{audios.map((audio) => <option key={audio.id} value={audio.id}>{audio.title}</option>)}</select><input className={field} type="file" accept="audio/*,image/*,video/*" onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)} /></label>
       <div className="flex flex-wrap gap-2"><button disabled={busy} className="min-h-11 rounded-lg bg-forest px-5 font-bold text-paper disabled:opacity-60">{busy ? 'Guardando…' : form.id ? 'Guardar cambios' : 'Publicar aviso'}</button><button type="button" onClick={() => setForm(null)} className="min-h-11 rounded-lg border border-line px-4 font-bold text-ink">Cancelar</button></div>
     </form>}
 

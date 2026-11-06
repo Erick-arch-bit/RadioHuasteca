@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS community_notices (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE community_notices ADD COLUMN IF NOT EXISTS media_url TEXT;
+ALTER TABLE community_notices ADD COLUMN IF NOT EXISTS media_public_id TEXT;
 
 CREATE TABLE IF NOT EXISTS citizen_submissions (
   id BIGSERIAL PRIMARY KEY,

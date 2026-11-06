@@ -11,11 +11,7 @@
     "admin:create": "npm --prefix backend run admin:create",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "verify:sprint1": "node scripts/verify-sprint-1.mjs",
-    "verify:sprint2": "node scripts/verify-sprint-2.mjs",
-    "verify:sprint3": "node scripts/verify-sprint-3.mjs",
-    "audio:generate": "bash scripts/generate-bulletin-audio.sh"
+    "preview": "vite preview"
   },
   "dependencies": {
     "lucide-react": "^1.47.0",

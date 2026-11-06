@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { noticeSeeds } from '../data/notices'
+import { getNotices } from '../services/noticeService'
 
 const STORAGE_KEY = 'radiohuasteca-sprint2-notices'
-const API = import.meta.env?.VITE_API_URL ?? ''
 
 function readNotices() {
   try {
@@ -21,8 +21,7 @@ export function useNotices(enabled = true) {
   useEffect(() => {
     if (!enabled) return undefined
     let active = true
-    const refresh = () => fetch(`${API}/api/notices`)
-      .then((response) => (response.ok ? response.json() : []))
+    const refresh = () => getNotices()
       .then((remote) => {
         if (!active || !Array.isArray(remote)) return
         setNotices((current) => {
@@ -31,7 +30,9 @@ export function useNotices(enabled = true) {
           return [...remote, ...local, ...noticeSeeds.filter((notice) => !remoteIds.has(notice.id))]
         })
       })
-      .catch(() => {})
+      .catch(() => {
+        if (active) setNotices(readNotices())
+      })
     window.addEventListener('radiohuasteca:notices-updated', refresh)
     refresh()
     return () => { active = false; window.removeEventListener('radiohuasteca:notices-updated', refresh) }
