@@ -15,12 +15,17 @@ const allowedOrigin = frontendOrigin ?? true
 
 const app = new Elysia()
   .use(cors({ origin: allowedOrigin, credentials: true }))
+  .get('/', () => ({ name: 'RadioHuasteca API', status: 'ok', health: '/api/health' }))
   .get('/api/health', () => ({ status: 'ok' }))
   .use(mediaRoutes)
   .use(noticeRoutes)
   .use(catalogRoutes)
   .use(adminRoutes)
   .onError(({ code, error, set }) => {
+    if (code === 'NOT_FOUND') {
+      set.status = 404
+      return { message: 'Ruta no encontrada.' }
+    }
     console.error(error)
     if (code === 'VALIDATION') {
       set.status = 400
