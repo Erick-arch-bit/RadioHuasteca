@@ -28,7 +28,7 @@ export async function uploadToCloudinary(
         else reject(new Error('Cloudinary no devolvió información del archivo.'))
       },
     )
-    Readable.from(new Uint8Array(fileBuffer)).pipe(stream)
+    Readable.from([Buffer.from(fileBuffer)]).pipe(stream)
   })
 
   const actualResourceType = result.resource_type === 'image' ? 'image' : 'video'
