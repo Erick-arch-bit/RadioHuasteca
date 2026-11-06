@@ -15,7 +15,7 @@ El **Sprint 1** estableció la estructura móvil, navegación y reproducción de
 
 ## Sprint 3 · Trámites y administración
 
-El Sprint 3 añade catálogo demostrativo con audio asociado por trámite y acceso administrativo. La API Express/PostgreSQL está separada en [`backend/`](backend/), lista para alojarse como repositorio independiente.
+El Sprint 3 añade catálogo demostrativo con audio asociado por trámite y acceso administrativo. La API Express/PostgreSQL está incluida en [`backend/`](backend/) y se ejecuta junto con la interfaz desde este repositorio.
 
 ## Sprint 4 · Fonoteca, buzón ciudadano y moderación
 
@@ -231,4 +231,3 @@ La especificación SDD está en [`docs/sprint-2-spec.md`](docs/sprint-2-spec.md)
 ## Dirección visual
 
 La paleta parte de referencias de la Huasteca: verdes de la vegetación, turquesa de sus ríos y cascadas, terracota del barro y crema de manta. Los colores son una interpretación de diseño, no una paleta oficial única de la región. Los tokens viven en `src/index.css` (`@theme`), de modo que cualquier ajuste visual se hace en un solo lugar.
-
