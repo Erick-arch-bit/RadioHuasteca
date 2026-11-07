@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { capsuleItems } from '../data/notices'
 
 const API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '')
+const fallbackAudio = '/audio/boletin-demo.mp3'
 
 export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause, onStop }) {
   const [capsules, setCapsules] = useState([])
@@ -23,7 +24,7 @@ export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause,
           ...item,
           duration: `${String(Math.floor((item.duration_seconds ?? 0) / 60)).padStart(2, '0')}:${String((item.duration_seconds ?? 0) % 60).padStart(2, '0')}`,
           size: item.file_size ? `${Math.round(item.file_size / 1024)} KB` : '',
-          src: [{ src: item.audio_url || `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
+          src: [{ src: item.audio_url?.startsWith('https://example.com/') ? fallbackAudio : item.audio_url || `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
         })))
       })
       .catch((reason) => { if (!cancelled) { setCapsules(capsuleItems); setError(`Sin conexión. Se muestra el catálogo guardado. ${reason.message}`) } })
