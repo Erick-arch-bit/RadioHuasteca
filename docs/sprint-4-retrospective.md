@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Incorporar gestión de audios, participación ciudadana con envío de audio/video y revisión humana antes de publicar, conservando la aplicación React y el backend Express/PostgreSQL de los sprints anteriores.
+Incorporar gestión de audios, participación ciudadana con envío de audio/video y revisión humana antes de publicar, conservando la aplicación React y el backend Bun/Elysia/PostgreSQL de los sprints anteriores.
 
 ## Qué quedó implementado
 

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { getAdmin } from '../auth'
+import { getAdmin, hasOperatorRole } from '../auth'
 import { getCloudinaryUrl } from '../cloudinary'
 import { sql } from '../db'
 
@@ -9,6 +9,9 @@ const createBody = t.Object({
   audioUrl: t.Optional(t.Union([t.String({ maxLength: 2000 }), t.Null()])),
   audioPublicId: t.Optional(t.Union([t.String({ maxLength: 255 }), t.Null()])),
   audioMimeType: t.Optional(t.Union([t.String({ maxLength: 100 }), t.Null()])),
+  mediaType: t.Optional(t.Union([t.String({ maxLength: 10 }), t.Null()])),
+  mediaPublicId: t.Optional(t.Union([t.String({ maxLength: 255 }), t.Null()])),
+  mediaMimeType: t.Optional(t.Union([t.String({ maxLength: 100 }), t.Null()])),
   isAnonymous: t.Boolean(),
   senderName: t.Optional(t.String({ maxLength: 100 })),
   senderContact: t.Optional(t.String({ maxLength: 100 })),
@@ -17,24 +20,30 @@ const createBody = t.Object({
 export const mailboxRoutes = new Elysia({ prefix: '/api/mailbox' })
   .post('/', async ({ body, set }) => {
     const [message] = await sql`INSERT INTO mailbox
-      (message_type, content, audio_url, audio_public_id, audio_mime_type, is_anonymous, sender_name, sender_contact)
+      (message_type, content, audio_url, audio_public_id, audio_mime_type, media_type, media_public_id, media_mime_type, is_anonymous, sender_name, sender_contact)
       VALUES (${body.messageType.trim()}, ${body.content.trim()}, ${body.audioUrl ?? null},
-        ${body.audioPublicId ?? null}, ${body.audioMimeType ?? null}, ${body.isAnonymous}, ${body.isAnonymous ? null : body.senderName?.trim() || null},
+        ${body.audioPublicId ?? null}, ${body.audioMimeType ?? null}, ${body.mediaType ?? null}, ${body.mediaPublicId ?? null}, ${body.mediaMimeType ?? null},
+        ${body.isAnonymous}, ${body.isAnonymous ? null : body.senderName?.trim() || null},
         ${body.senderContact?.trim() || null}) RETURNING id`
     set.status = 201
     return { id: message.id, message: 'Tu mensaje se envió de forma privada a la radio.' }
   }, { body: createBody })
   .get('/', async ({ headers, query, set }) => {
-    if (!await getAdmin(headers)) { set.status = 401; return { message: 'Inicia sesión para continuar.' } }
+    const admin = await getAdmin(headers)
+    if (!admin) { set.status = 401; return { message: 'Inicia sesión para continuar.' } }
+    if (!hasOperatorRole(admin)) { set.status = 403; return { message: 'No tienes permisos para consultar el buzón.' } }
     const rows = query.type
       ? await sql`SELECT * FROM mailbox WHERE message_type = ${query.type} ORDER BY created_at DESC`
       : await sql`SELECT * FROM mailbox ORDER BY created_at DESC`
-    return rows.map((row) => ({ ...row, audio_url: row.audio_public_id && row.audio_mime_type
-      ? getCloudinaryUrl(row.audio_public_id, row.audio_mime_type, { authenticated: true }) : null }))
+    return rows.map((row) => ({ ...row,
+      audio_url: row.audio_public_id && row.audio_mime_type ? getCloudinaryUrl(row.audio_public_id, row.audio_mime_type, { authenticated: true }) : null,
+      media_url: row.media_public_id && row.media_mime_type ? getCloudinaryUrl(row.media_public_id, row.media_mime_type, { authenticated: true }) : null,
+    }))
   }, { query: t.Object({ type: t.Optional(t.String({ maxLength: 50 })) }) })
   .patch('/:id/review', async ({ params, headers, set }) => {
     const admin = await getAdmin(headers)
     if (!admin) { set.status = 401; return { message: 'Inicia sesión para continuar.' } }
+    if (!hasOperatorRole(admin)) { set.status = 403; return { message: 'No tienes permisos para revisar el buzón.' } }
     const result = await sql`UPDATE mailbox SET status = 'reviewed', reviewed_by = ${admin.id}, reviewed_at = NOW()
       WHERE id = ${params.id} AND status = 'pending'`
     if (result.count === 0) { set.status = 404; return { message: 'Mensaje pendiente no encontrado.' } }

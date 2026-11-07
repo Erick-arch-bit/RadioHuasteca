@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Pencil, Plus, X } from 'lucide-react'
-import { getNotices, createNotice } from '../services/noticeService'
 import { uploadMedia } from '../services/mediaService'
 
 const API = import.meta.env?.VITE_API_URL ?? ''
@@ -16,8 +15,13 @@ export function NoticeManagement() {
   const [busy, setBusy] = useState(false)
 
   async function load() {
-    const [notices, audioResponse] = await Promise.all([getNotices(), fetch(`${API}/api/audios`)])
-    setItems(notices)
+    const [noticeResponse, audioResponse] = await Promise.all([
+      fetch(`${API}/api/admin/notices?status=all`, { credentials: 'include' }),
+      fetch(`${API}/api/audios`),
+    ])
+    const noticeData = await noticeResponse.json()
+    if (!noticeResponse.ok) throw new Error(noticeData.message || 'No se pudieron cargar los avisos.')
+    setItems(noticeData)
     if (audioResponse.ok) setAudios(await audioResponse.json())
   }
 
@@ -50,7 +54,11 @@ export function NoticeManagement() {
           if (!response.ok) throw new Error(data.message || 'No se pudo guardar el aviso.')
           return data
         })
-        : await createNotice(payload)
+        : await fetch(`${API}/api/admin/notices`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(async (response) => {
+          const data = await response.json()
+          if (!response.ok) throw new Error(data.message || 'No se pudo guardar el aviso.')
+          return data
+        })
       setForm(null)
       setSelectedFile(null)
       setMessage(result.message)

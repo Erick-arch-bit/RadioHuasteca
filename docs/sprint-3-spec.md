@@ -1,6 +1,8 @@
 # Sprint 3 · Trámites, audio y acceso administrativo
 
-La aplicación web mantiene React + Vite + Tailwind. El servidor Express y PostgreSQL se incorporan como capa aditiva; los avisos, cápsulas, navegación y boletín de Sprints 1–2 conservan su implementación.
+> Nota de implementación: el backend actual está construido con Bun y Elysia en `backend/`, no con Express. Las instrucciones operativas deben usar `npm --prefix backend run ...`.
+
+La aplicación web mantiene React + Vite + Tailwind. El servidor Bun/Elysia y PostgreSQL se incorporan como capa aditiva; los avisos, cápsulas, navegación y boletín de Sprints 1–2 conservan su implementación.
 
 ## Diagrama de datos
 
@@ -41,7 +43,7 @@ erDiagram
 1. Copia `.env.example` a `.env`; define `DATABASE_URL` y un `SESSION_SECRET` aleatorio de al menos 32 caracteres. Exporta estas variables en la terminal; no publiques `.env`.
 2. Ejecuta `npm run db:init` para crear las tablas y cargar tres trámites demostrativos y sus audios relacionados.
 3. Define temporalmente `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_NAME` y `ADMIN_PASSWORD` (mínimo 12 caracteres) y ejecuta `npm run admin:create`. No hay credenciales predeterminadas en el repositorio.
-4. Ejecuta `npm run server` y, en otra terminal, `npm run dev`. Vite reenvía `/api` a Express.
+4. Ejecuta `npm --prefix backend run dev` y, en otra terminal, `npm run dev`. Vite reenvía `/api` a Bun/Elysia.
 
 En producción, sirve interfaz y API bajo el mismo origen HTTPS. La cookie de sesión es `HttpOnly`, `SameSite=Strict` y `Secure` en producción.
 

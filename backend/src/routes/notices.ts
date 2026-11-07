@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { getAdmin } from '../auth'
+import { getAdmin, hasOperatorRole } from '../auth'
 import { sql } from '../db'
 
 const noticeBody = t.Object({
@@ -49,6 +49,7 @@ export const noticeRoutes = new Elysia({ prefix: '/api/notices' })
   .patch('/:id/moderate', async ({ params, body, headers, set }) => {
     const admin = await getAdmin(headers)
     if (!admin) { set.status = 401; return { message: 'Inicia sesión para continuar.' } }
+    if (!hasOperatorRole(admin)) { set.status = 403; return { message: 'No tienes permisos para moderar avisos.' } }
     const result = await sql`UPDATE notices SET status = ${body.status}, rejection_reason = ${body.reason ?? null},
       moderated_by = ${admin.id}, moderated_at = NOW() WHERE id = ${params.id} AND status = 'pending'`
     if (result.count === 0) { set.status = 404; return { message: 'Aviso pendiente no encontrado.' } }

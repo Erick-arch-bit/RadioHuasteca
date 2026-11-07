@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { getAdmin } from '../auth'
+import { getAdmin, hasOperatorRole } from '../auth'
 import { destroyCloudinaryAsset, getCloudinaryUrl, renameCloudinaryAsset, uploadToCloudinary } from '../cloudinary'
 import { sql } from '../db'
 
@@ -21,6 +21,7 @@ const reviewBody = t.Object({
 async function adminOr401(headers: Record<string, string | undefined>, set: { status?: number | string }) {
   const admin = await getAdmin(headers)
   if (!admin) set.status = 401
+  else if (!hasOperatorRole(admin)) { set.status = 403; return null }
   return admin
 }
 

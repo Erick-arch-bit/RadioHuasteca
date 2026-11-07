@@ -10,12 +10,24 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   display_name VARCHAR(100) NOT NULL,
-  role VARCHAR(20) DEFAULT 'admin' CHECK (role IN ('admin', 'moderator')),
+  role VARCHAR(20) DEFAULT 'admin' CHECK (role IN ('admin', 'moderator', 'operator')),
   is_active BOOLEAN DEFAULT true,
   last_login TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.users'::regclass AND conname = 'users_role_check'
+  ) THEN
+    ALTER TABLE users DROP CONSTRAINT users_role_check;
+  END IF;
+  ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'moderator', 'operator'));
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;
 
 -- Índice para búsquedas rápidas por email
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
@@ -163,3 +175,6 @@ CREATE TABLE IF NOT EXISTS submission_review_history (
 CREATE INDEX IF NOT EXISTS idx_notices_status_created ON notices(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_mailbox_status_created ON mailbox(status, created_at DESC);
 ALTER TABLE mailbox ADD COLUMN IF NOT EXISTS audio_mime_type VARCHAR(100);
+ALTER TABLE mailbox ADD COLUMN IF NOT EXISTS media_type VARCHAR(10);
+ALTER TABLE mailbox ADD COLUMN IF NOT EXISTS media_public_id TEXT;
+ALTER TABLE mailbox ADD COLUMN IF NOT EXISTS media_mime_type VARCHAR(100);

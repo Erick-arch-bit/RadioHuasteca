@@ -2,13 +2,13 @@
 
 Documentos relacionados: [verificación/evidencias](sprint-4-verification.md) · [retrospectiva y espacio para el prompt](sprint-4-retrospective.md).
 
-Sprint 4 extiende la API Express/PostgreSQL del Sprint 3 y conserva la interfaz React existente. El backend vive en `backend/` como paquete independiente. Ejecuta `npm --prefix backend run db:init` para aplicar el esquema y `npm --prefix backend run dev` para iniciar la API; la interfaz se inicia con `npm run dev`. Las fotos aprobadas se sirven optimizadas desde Cloudinary. Fotos y medios ciudadanos pendientes se almacenan como activos autenticados y solo moderación puede generar un enlace temporal para revisarlos.
+Sprint 4 extiende la API Bun/Elysia/PostgreSQL del Sprint 3 y conserva la interfaz React existente. El backend vive en `backend/` como paquete independiente. Ejecuta `npm --prefix backend run db:init` para aplicar el esquema y `npm --prefix backend run dev` para iniciar la API; la interfaz se inicia con `npm run dev`. Las fotos aprobadas se sirven optimizadas desde Cloudinary. Fotos y medios ciudadanos pendientes se almacenan como activos autenticados y solo moderación puede generar un enlace temporal para revisarlos.
 
 ## Historias implementadas
 
 - HU-08: carga autenticada de audio en el panel, con título, categoría, idioma, duración y descripción. El servidor valida metadatos, tipo MIME, firma básica, archivo vacío y máximo de 50 MB; registra al operador.
 - HU-09: Fonoteca pública con filtro de categoría, ficha del audio seleccionado y reproducción con controles nativos.
-- HU-10: Buzón público adaptable a móvil, admite foto, audio o video de hasta 50 MB y contacto opcional privado. Una respuesta satisfactoria indica que el contenido quedó pendiente.
+- HU-10: Buzón público adaptable a móvil, admite foto, audio o video de hasta 15 MB mediante el endpoint de carga multimedia y contacto opcional privado. Una respuesta satisfactoria indica que el contenido quedó pendiente.
 - HU-11: moderación bajo sesión válida, revisión con reproductor, aprobación con título público o rechazo; cada transición queda en `moderation_history`.
 
 ## Datos y privacidad

@@ -15,6 +15,7 @@ import { useNotices } from './hooks/useNotices'
 import { defaultLocale, getCopy, isDraftLocale } from './i18n/translations'
 
 const AdminView = lazy(() => import('./components/AdminView').then((module) => ({ default: module.AdminView })))
+const AboutView = lazy(() => import('./components/AboutView').then((module) => ({ default: module.AboutView })))
 const CapsuleCatalog = lazy(() => import('./components/CapsuleCatalog').then((module) => ({ default: module.CapsuleCatalog })))
 const CitizenBoxView = lazy(() => import('./components/MediaViews').then((module) => ({ default: module.CitizenBoxView })))
 const FonotecaView = lazy(() => import('./components/MediaViews').then((module) => ({ default: module.FonotecaView })))
@@ -201,6 +202,8 @@ function App() {
           <FonotecaView />
         ) : activeView === 'buzon' ? (
           <CitizenBoxView />
+        ) : activeView === 'sobre' ? (
+          <AboutView copy={copy} />
         ) : (
           <InnerView copy={copy} item={currentItem} onGoHome={goHome} />
         )}

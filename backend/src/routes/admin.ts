@@ -9,6 +9,10 @@ const noticeSchema = t.Object({
   summary: t.Optional(t.String({ maxLength: 5000 })),
   priority: t.Optional(t.String({ maxLength: 20 })),
   status: t.Optional(t.String({ maxLength: 20 })),
+  category: t.Optional(t.String({ maxLength: 50 })),
+  type: t.Optional(t.String({ maxLength: 50 })),
+  date: t.Optional(t.String({ maxLength: 10 })),
+  audioId: t.Optional(t.Union([t.String(), t.Null()])),
   mediaUrl: t.Optional(t.Union([t.String(), t.Null()])),
   mediaPublicId: t.Optional(t.Union([t.String(), t.Null()])),
   imageUrl: t.Optional(t.Union([t.String(), t.Null()])),
@@ -70,19 +74,22 @@ export const adminRoutes = new Elysia({ prefix: '/api' })
       (SELECT publish_date::text FROM bulletins ORDER BY publish_date DESC LIMIT 1) AS latest_bulletin`
     return stats
   })
-  .get('/admin/notices', async ({ headers, set }) => {
+  .get('/admin/notices', async ({ query, headers, set }) => {
     const admin = await requireAdmin(headers, set)
     if (!admin) return { message: 'Inicia sesión para continuar.' }
-    return sql`SELECT id, title, summary AS description, priority, status, category, audio_url, image_url,
-      to_char(created_at, 'YYYY-MM-DD') AS date FROM notices WHERE status = 'pending' ORDER BY created_at DESC`
-  })
+    const status = query.status === 'all' ? null : (query.status ?? 'pending')
+    return sql`SELECT id, title, summary AS description, summary, priority, status, category,
+      audio_url, audio_url AS "mediaUrl", audio_public_id AS "mediaPublicId", image_url,
+      to_char(created_at, 'YYYY-MM-DD') AS date
+      FROM notices WHERE (${status}::text IS NULL OR status = ${status}) ORDER BY created_at DESC`
+  }, { query: t.Object({ status: t.Optional(t.String({ maxLength: 20 })) }) })
   .post('/admin/notices', async ({ body, headers, set }) => {
     const admin = await requireAdmin(headers, set)
     if (!admin) return { message: 'Inicia sesión para continuar.' }
     const [notice] = await sql`
-      INSERT INTO notices (title, summary, priority, status, audio_url, audio_public_id,
+      INSERT INTO notices (title, summary, category, priority, status, audio_url, audio_public_id,
         image_url, image_public_id, created_by)
-      VALUES (${body.title.trim()}, ${body.summary ?? body.description ?? null}, ${body.priority ?? 'normal'},
+      VALUES (${body.title.trim()}, ${body.summary ?? body.description ?? null}, ${body.category ?? body.type ?? 'community'}, ${body.priority ?? 'normal'},
         ${body.status ?? 'active'}, ${body.mediaUrl ?? null}, ${body.mediaPublicId ?? null},
         ${body.imageUrl ?? null}, ${body.imagePublicId ?? null}, ${admin.id})
       RETURNING id
@@ -95,7 +102,7 @@ export const adminRoutes = new Elysia({ prefix: '/api' })
     if (!admin) return { message: 'Inicia sesión para continuar.' }
     const result = await sql`
       UPDATE notices SET title=${body.title.trim()}, summary=${body.summary ?? body.description ?? null},
-        priority=${body.priority ?? 'normal'}, status=${body.status ?? 'active'},
+        category=${body.category ?? body.type ?? 'community'}, priority=${body.priority ?? 'normal'}, status=${body.status ?? 'active'},
         audio_url=${body.mediaUrl ?? null}, audio_public_id=${body.mediaPublicId ?? null},
         image_url=${body.imageUrl ?? null}, image_public_id=${body.imagePublicId ?? null}
       WHERE id=${params.id.replace('community-', '')}

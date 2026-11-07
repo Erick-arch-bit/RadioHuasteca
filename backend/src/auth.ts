@@ -6,6 +6,7 @@ if (!secret || secret.length < 32) throw new Error('Define SESSION_SECRET con al
 const sessionSecret: string = secret
 
 export type AdminSession = { id: string; username: string; displayName: string; role: string; exp: number }
+export const operatorRoles = ['admin', 'moderator', 'operator']
 
 const encodedHeader = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
 
@@ -39,6 +40,10 @@ export async function getAdmin(headers: Record<string, string | undefined>) {
   if (!session) return null
   const [admin] = await sql`SELECT id, username, display_name, role FROM users WHERE id = ${session.id} AND is_active = true`
   return admin ? { ...session, displayName: admin.display_name, role: admin.role } : null
+}
+
+export function hasOperatorRole(admin: AdminSession | null | undefined) {
+  return Boolean(admin && operatorRoles.includes(admin.role))
 }
 
 export function clearSessionCookie(isCrossOrigin = false) {
