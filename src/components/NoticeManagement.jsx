@@ -20,9 +20,10 @@ export function NoticeManagement() {
       fetch(`${API}/api/audios`),
     ])
     const noticeData = await noticeResponse.json()
-    if (!noticeResponse.ok) throw new Error(noticeData.message || 'No se pudieron cargar los avisos.')
+    if (!noticeResponse.ok || !Array.isArray(noticeData)) throw new Error(noticeData.message || 'No se pudieron cargar los avisos.')
     setItems(noticeData)
-    if (audioResponse.ok) setAudios(await audioResponse.json())
+    const audioData = audioResponse.ok ? await audioResponse.json() : []
+    setAudios(Array.isArray(audioData) ? audioData : [])
   }
 
   // eslint-disable-next-line react/set-state-in-effect -- Fetching this view's server data is the effect.

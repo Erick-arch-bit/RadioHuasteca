@@ -30,9 +30,14 @@ export function AdminView() {
   async function loadPanel() {
     try {
       const response = await fetch(`${API}/api/admin/summary`, { credentials: 'include' })
-      if (response.ok) setSummary(await response.json())
+      const data = await responsePayload(response)
+      if (!response.ok || !data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error(data?.message || 'No se pudo cargar el resumen administrativo.')
+      }
+      setSummary(data)
     } catch {
       setSummary(null)
+      setMessage('No se pudo cargar el resumen administrativo. Revisa la conexión con la API.')
     }
   }
 
