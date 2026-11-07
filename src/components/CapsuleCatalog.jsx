@@ -18,11 +18,12 @@ export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause,
       })
       .then((items) => {
         if (cancelled) return
+        if (!Array.isArray(items)) throw new Error('La API devolvió un catálogo inválido.')
         setCapsules(items.map((item) => ({
           ...item,
           duration: `${String(Math.floor((item.duration_seconds ?? 0) / 60)).padStart(2, '0')}:${String((item.duration_seconds ?? 0) % 60).padStart(2, '0')}`,
           size: item.file_size ? `${Math.round(item.file_size / 1024)} KB` : '',
-          src: [{ src: `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
+          src: [{ src: item.audio_url || `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
         })))
       })
       .catch((reason) => { if (!cancelled) { setCapsules(capsuleItems); setError(`Sin conexión. Se muestra el catálogo guardado. ${reason.message}`) } })
