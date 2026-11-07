@@ -16,11 +16,18 @@ export const catalogRoutes = new Elysia({ prefix: '/api' })
     responsible: '',
     audio_url: procedure.audio_url,
   })))
-  .get('/audios', () => sql`
-    SELECT id, title, description, duration_seconds, id::text AS storage_name,
-      audio_url, category, language, 0 AS file_size
-    FROM capsules ORDER BY created_at DESC
-  `)
+  .get('/audios', async () => (await sql`
+    SELECT id, title, audio_url
+    FROM capsules ORDER BY id DESC
+  `).map((capsule) => ({
+    ...capsule,
+    description: capsule.description ?? '',
+    duration_seconds: capsule.duration_seconds ?? 0,
+    storage_name: String(capsule.id),
+    category: capsule.category ?? 'Comunidad',
+    language: capsule.language ?? 'Español',
+    file_size: 0,
+  })))
   .get('/bulletins/latest', async () => (await sql`SELECT id, title, publish_date, audio_url, duration_seconds
     FROM bulletins WHERE is_active = true ORDER BY publish_date DESC LIMIT 1`)[0] ?? null)
   .get('/published-submissions', () => sql`SELECT id, title, media_type, file_size,
