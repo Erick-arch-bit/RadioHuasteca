@@ -4,15 +4,15 @@ import { sql } from '../db'
 
 export const catalogRoutes = new Elysia({ prefix: '/api' })
   .get('/procedures', async () => (await sql`
-    SELECT id, name, description, requirements, audio_url, is_priority
+    SELECT id, name, description, requirements, steps, audio_url, audio_public_id, language, is_priority
     FROM procedures ORDER BY is_priority DESC, name
   `).map((procedure) => ({
     ...procedure,
     title: procedure.name,
     summary: procedure.description,
     priority: procedure.is_priority,
-    requirements: procedure.requirements ? [procedure.requirements] : [],
-    steps: [],
+    requirements: procedure.requirements ? procedure.requirements.split('\n').filter(Boolean) : [],
+    steps: procedure.steps ? procedure.steps.split('\n').filter(Boolean) : [],
     responsible: '',
     audio_url: procedure.audio_url,
   })))
@@ -21,6 +21,8 @@ export const catalogRoutes = new Elysia({ prefix: '/api' })
       audio_url, category, language, 0 AS file_size
     FROM capsules ORDER BY created_at DESC
   `)
+  .get('/bulletins/latest', async () => (await sql`SELECT id, title, publish_date, audio_url, duration_seconds
+    FROM bulletins WHERE is_active = true ORDER BY publish_date DESC LIMIT 1`)[0] ?? null)
   .get('/published-submissions', () => sql`SELECT id, title, media_type, file_size,
     id::text AS storage_name, category, language, description, created_at
     FROM citizen_submissions WHERE status = 'APROBADO' ORDER BY reviewed_at DESC`)

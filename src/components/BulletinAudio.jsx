@@ -18,7 +18,7 @@ export function BulletinAudio({ audioRef, onError, sources }) {
       onError={onError}
     >
       {sources.map(({ id, src, type }) => (
-        <source key={id} src={src} type={type} onError={onError} />
+        <source key={id || src} src={src} type={type} onError={onError} />
       ))}
       Tu navegador no puede reproducir el boletín de audio.
     </audio>

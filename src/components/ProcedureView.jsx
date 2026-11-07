@@ -14,7 +14,7 @@ function ProcedureAudio({ procedure }) {
       <audio
         className="mt-3 w-full"
         controls
-        preload="none"
+        preload="metadata"
         src={procedure.audio.src}
         aria-label={`Audio del trámite ${procedure.title}`}
         onLoadStart={() => setState('loading')}
@@ -41,7 +41,7 @@ export function ProcedureView({ locale = 'es' }) {
       setProcedures(rows.map((row) => ({
         id: row.id, title: row.title, summary: row.summary, requirements: row.requirements, steps: row.steps,
         responsible: row.responsible, validity: row.validity, priority: row.priority,
-        audio: row.audio_url ? { src: row.audio_url, language: row.audio_language === 'hnh' ? 'Hñähñu' : 'Español', voice: row.audio_voice, demo: row.audio_is_demo } : null,
+        audio: row.audio_url ? { src: row.audio_url, language: row.language === 'hn' ? 'Hñähñu' : 'Español', voice: row.audio_voice, demo: row.audio_is_demo } : null,
         hnhStatus: row.translations?.hnh?.status === 'pending_validation' ? 'Pendiente de traducción y validación comunitaria' : 'Revisar estado de traducción',
       })))
     }).catch(() => {})

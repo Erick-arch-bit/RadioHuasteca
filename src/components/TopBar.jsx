@@ -1,5 +1,6 @@
 import { Languages, Menu, Radio, X } from 'lucide-react'
 import { locales, translations } from '../i18n/translations'
+import { navigationItems } from '../data/navigation'
 
 // ---------------------------------------------------------------------------
 // RadioHuasteca · Barra superior (HU-02, HU-13)
@@ -7,7 +8,7 @@ import { locales, translations } from '../i18n/translations'
 // que no respondía, que es condición de rechazo de HU-02.
 // ---------------------------------------------------------------------------
 
-export function TopBar({ children, copy, locale, menuOpen, onGoHome, onSelectLocale, onToggleMenu }) {
+export function TopBar({ children, copy, locale, menuOpen, activeView, onGoHome, onSelect, onSelectLocale, onToggleMenu }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper/84 backdrop-blur-[12px]">
       <div className="flex h-[76px] items-center gap-3.5 px-[clamp(18px,5vw,72px)] max-xs:h-[68px] max-xs:gap-2 max-xs:px-[13px]">
@@ -18,7 +19,7 @@ export function TopBar({ children, copy, locale, menuOpen, onGoHome, onSelectLoc
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
           onClick={onToggleMenu}
-          className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-ink desk:hidden"
+          className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-ink min-[1000px]:hidden"
         >
           {menuOpen ? <X size={21} /> : <Menu size={21} />}
         </button>
@@ -39,10 +40,25 @@ export function TopBar({ children, copy, locale, menuOpen, onGoHome, onSelectLoc
           </span>
         </button>
 
+        <nav aria-label={copy.navigationLabel} className="ml-auto hidden items-center gap-1 min-[1000px]:flex">
+          {navigationItems.map(({ id, labelKey }) => (
+            <button
+              key={id}
+              type="button"
+              data-testid={`desktop-nav-${id}`}
+              aria-current={activeView === id ? 'page' : undefined}
+              onClick={() => onSelect(id)}
+              className={`min-h-10 cursor-pointer rounded-lg border-0 px-2.5 text-[12px] font-bold transition-colors hover:bg-cream ${activeView === id ? 'bg-leaf text-forest' : 'bg-transparent text-ink/70'}`}
+            >
+              {copy[labelKey]}
+            </button>
+          ))}
+        </nav>
+
         <div
           role="group"
           aria-label={copy.languageSwitchLabel}
-          className="ml-auto flex items-center gap-1 rounded-lg border border-line p-1"
+          className="ml-auto flex shrink-0 items-center gap-1 rounded-lg border border-line p-1 desk:ml-2"
         >
           <Languages size={16} className="ml-1 shrink-0 text-forest max-xs:hidden" aria-hidden="true" />
           {locales.map((code) => (

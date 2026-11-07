@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LockKeyhole, LogOut } from 'lucide-react'
-import { AudioUpload, ModerationView } from './MediaViews'
+import { ContentManager, MailboxView, ModerationView } from './MediaViews'
 import { NoticeManagement } from './NoticeManagement'
 
 const API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '')
@@ -34,6 +34,11 @@ export function AdminView() {
     } catch {
       setSummary(null)
     }
+  }
+
+  function changeSection(next) {
+    setSection(next)
+    if (next === 'panel') loadPanel()
   }
 
   useEffect(() => {
@@ -98,25 +103,29 @@ export function AdminView() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl animate-reveal" data-testid="admin-view">
+    <section className="mx-auto max-w-6xl animate-reveal" data-testid="admin-view">
       <p className="text-[10px] font-extrabold uppercase tracking-[.11em] text-clay">Administración</p>
       <h1 className="mt-2 font-serif text-[clamp(38px,9vw,56px)] text-ink">{user ? 'Panel administrativo' : 'Acceso administrativo'}</h1>
       {user ? <>
-        <div className="mt-6 rounded-2xl border border-line bg-paper p-5">
-          <p>Sesión iniciada como <strong>{user.displayName}</strong>.</p>
-          <p className="mt-5 font-bold text-ink">Resumen del catálogo</p>
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-cream p-4"><strong className="block text-2xl">{summary?.procedures ?? '—'}</strong><span className="text-xs text-muted">Trámites publicados</span></div>
-            <div className="rounded-lg bg-cream p-4"><strong className="block text-2xl">{summary?.priority_procedures ?? '—'}</strong><span className="text-xs text-muted">Con prioridad</span></div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={() => setSection('panel')} className="min-h-11 rounded-lg border border-line px-4 font-bold">Panel</button>
-            <button onClick={() => setSection('avisos')} className="min-h-11 rounded-lg border border-line px-4 font-bold">Avisos</button>
-            <button onClick={() => setSection('moderacion')} className="min-h-11 rounded-lg border border-line px-4 font-bold">Moderación</button>
-            <button onClick={logout} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-forest px-4 font-bold text-paper"><LogOut size={17} /> Cerrar sesión</button>
+        <div className="mt-6 grid gap-5 desk:grid-cols-[230px_minmax(0,1fr)]">
+          <aside className="h-fit rounded-2xl border border-line bg-paper p-3 desk:sticky desk:top-24">
+            <p className="px-3 py-2 text-xs text-muted">Sesión: <strong>{user.displayName}</strong></p>
+            <nav aria-label="Secciones administrativas" className="grid grid-cols-2 gap-1 desk:grid-cols-1">
+              {[
+                ['panel','Dashboard'],['moderacion','Moderación'],['buzon','Buzón'],['contenido','Contenido'],['avisos','Avisos'],
+              ].map(([id,label])=><button key={id} aria-current={section===id?'page':undefined} onClick={()=>changeSection(id)} className={`min-h-11 rounded-lg px-3 text-left text-sm font-bold ${section===id?'bg-leaf text-forest':'text-ink hover:bg-cream'}`}>{label}{id==='buzon'&&summary?.unread_mailbox>0?<span className="ml-2 rounded-full bg-clay px-2 py-0.5 text-xs text-white">{summary.unread_mailbox}</span>:null}</button>)}
+            </nav>
+            <button onClick={logout} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-forest px-4 font-bold text-paper"><LogOut size={17} /> Cerrar sesión</button>
+          </aside>
+          <div className="min-w-0 rounded-2xl border border-line bg-paper p-4 desk:p-6">
+            {section==='panel'?<>
+              <h2 className="font-serif text-3xl text-ink">Dashboard</h2><p className="mt-1 text-sm text-muted">Resumen actualizado al abrir esta sección.</p>
+              <div className="mt-5 grid grid-cols-2 gap-3 desk:grid-cols-3">
+                {[[summary?.pending_notices,'Avisos pendientes'],[summary?.unread_mailbox,'Mensajes sin atender'],[summary?.procedures,'Trámites'],[summary?.capsules,'Cápsulas'],[summary?.latest_bulletin||'—','Último boletín']].map(([value,label])=><article key={label} className="rounded-xl bg-cream p-4"><strong className="block break-words text-2xl text-ink">{value??'—'}</strong><span className="text-xs text-muted">{label}</span></article>)}
+              </div>
+            </>:section==='moderacion'?<ModerationView user={user}/>:section==='buzon'?<MailboxView/>:section==='avisos'?<NoticeManagement/>:<ContentManager onChange={loadPanel}/>}
           </div>
         </div>
-        {section === 'moderacion' ? <ModerationView user={user} /> : section === 'avisos' ? <NoticeManagement /> : <AudioUpload onUploaded={() => {}} />}
       </> : <form onSubmit={login} className="mt-6 space-y-4 rounded-2xl border border-line bg-paper p-5">
         <div className="flex items-center gap-2 text-sm text-muted"><LockKeyhole size={18} /> Inicia sesión con una cuenta administradora.</div>
         <label className="block text-sm font-bold">Usuario o correo<input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-white px-3 font-normal" /></label>

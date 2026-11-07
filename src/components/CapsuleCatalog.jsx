@@ -1,5 +1,6 @@
 import { Pause, Play, Radio, Square } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { capsuleItems } from '../data/notices'
 
 const API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '')
 
@@ -24,7 +25,7 @@ export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause,
           src: [{ src: `${API}/api/media/${item.id}`, type: 'audio/mpeg' }],
         })))
       })
-      .catch((reason) => { if (!cancelled) setError(reason.message) })
+      .catch((reason) => { if (!cancelled) { setCapsules(capsuleItems); setError(`Sin conexión. Se muestra el catálogo guardado. ${reason.message}`) } })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
@@ -35,7 +36,7 @@ export function CapsuleCatalog({ copy, activeId, playbackState, onPlay, onPause,
       <h1 className="mt-2 font-serif text-[clamp(32px,8vw,48px)] leading-tight text-ink">{copy.capsulesTitle}</h1>
       <p className="mt-2 mb-6 text-sm text-muted">{copy.capsulesIntro}</p>
       {loading ? <p role="status" className="rounded border border-line bg-paper p-4 text-sm text-muted">Cargando cápsulas…</p> : null}
-      {error ? <p role="alert" className="rounded border border-line bg-paper p-4 text-sm text-muted">{error}</p> : null}
+      {error ? <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-paper p-4 text-sm text-muted"><span>{error}</span><button onClick={()=>window.location.reload()} className="min-h-10 rounded-lg bg-forest px-3 font-bold text-white">Reintentar</button></div> : null}
       {!loading && !error && capsules.length === 0 ? <p className="rounded border border-line bg-paper p-4 text-sm text-muted">Todavía no hay cápsulas publicadas.</p> : null}
       <div className="grid gap-3">
         {capsules.map((capsule) => {

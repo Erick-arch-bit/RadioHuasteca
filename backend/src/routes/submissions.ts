@@ -73,7 +73,7 @@ export const submissionRoutes = new Elysia({ prefix: '/api' })
   .get('/admin/submissions/:id/history', async ({ params, headers, set }) => {
     if (!await adminOr401(headers, set)) return { message: 'Inicia sesión para continuar.' }
     return sql`SELECT h.id, h.status, h.note, h.created_at, a.username AS admin
-      FROM submission_review_history h LEFT JOIN admins a ON a.id = h.admin_id
+      FROM submission_review_history h LEFT JOIN users a ON a.id = h.admin_id
       WHERE h.submission_id = ${params.id} ORDER BY h.created_at DESC`
   })
   .patch('/admin/submissions/:id', async ({ params, body, headers, set }) => {

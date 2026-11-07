@@ -4,6 +4,7 @@ import { Elysia } from 'elysia'
 import { adminRoutes } from './routes/admin'
 import { catalogRoutes } from './routes/catalog'
 import { mediaRoutes } from './routes/media'
+import { mailboxRoutes } from './routes/mailbox'
 import { noticeRoutes } from './routes/notices'
 import { submissionRoutes } from './routes/submissions'
 
@@ -19,6 +20,7 @@ const app = new Elysia()
   .get('/', () => ({ name: 'RadioHuasteca API', status: 'ok', health: '/api/health' }))
   .get('/api/health', () => ({ status: 'ok' }))
   .use(mediaRoutes)
+  .use(mailboxRoutes)
   .use(noticeRoutes)
   .use(submissionRoutes)
   .use(catalogRoutes)

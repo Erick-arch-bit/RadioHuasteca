@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { uploadToCloudinary, type CloudinaryResourceType } from '../cloudinary'
 
 const mediaFile = t.File({
-  maxSize: '50m',
+  maxSize: '15m',
   type: ['image/*', 'audio/*', 'video/*'],
 })
 
@@ -22,11 +22,13 @@ export const mediaRoutes = new Elysia({ prefix: '/api/media' }).post(
         : 'auto'
 
     try {
-      return await uploadToCloudinary(await file.arrayBuffer(), resourceType)
+      const folder = body.folder ?? 'general'
+      const asset = await uploadToCloudinary(await file.arrayBuffer(), resourceType, folder === 'buzon' ? 'authenticated' : 'upload', folder)
+      return { ...asset, mimeType: file.type }
     } catch (error) {
       set.status = 502
       return { message: `No se pudo subir el archivo a Cloudinary: ${String(error)}` }
     }
   },
-  { body: t.Object({ file: mediaFile }) },
+  { body: t.Object({ file: mediaFile, folder: t.Optional(t.Union([t.Literal('avisos'),t.Literal('boletin'),t.Literal('capsulas'),t.Literal('buzon'),t.Literal('tramites'),t.Literal('general')])) }) },
 )

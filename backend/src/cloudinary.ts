@@ -17,11 +17,12 @@ export async function uploadToCloudinary(
   fileBuffer: ArrayBuffer,
   resourceType: CloudinaryResourceType,
   type: 'upload' | 'authenticated' = 'upload',
+  folder = 'general',
 ) {
   const uploadType = resourceType === 'auto' ? 'auto' : resourceType
   const result = await new Promise<UploadApiResponse>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'radiohuasteca', resource_type: uploadType, type, overwrite: false },
+      { folder: `radiohuasteca/${folder}`, resource_type: uploadType, type, overwrite: false },
       (error, uploaded) => {
         if (error) reject(error)
         else if (uploaded) resolve(uploaded)

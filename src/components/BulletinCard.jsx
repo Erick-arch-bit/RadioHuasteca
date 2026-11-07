@@ -6,7 +6,10 @@ import { BulletinPlayer } from './BulletinPlayer'
 // pesa cero bytes y se ve bien en pantallas pequeñas.
 // ---------------------------------------------------------------------------
 
-export function BulletinCard({ copy, player, sources }) {
+export function BulletinCard({ copy, player, sources, bulletin }) {
+  const publishDate = bulletin?.publish_date
+    ? new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${bulletin.publish_date}T12:00:00Z`)).toUpperCase()
+    : copy.bulletinDate
   return (
     <section
       aria-labelledby="bulletin-title"
@@ -17,7 +20,7 @@ export function BulletinCard({ copy, player, sources }) {
         <span className="text-[10px] font-extrabold uppercase tracking-[.11em] text-clay">
           {copy.latestBulletin}
         </span>
-        <span className="text-[10px] font-extrabold tracking-[.08em] text-forest">{copy.bulletinDate}</span>
+        <span className="text-[10px] font-extrabold tracking-[.08em] text-forest">{publishDate}</span>
       </div>
 
       <div
@@ -39,7 +42,7 @@ export function BulletinCard({ copy, player, sources }) {
             id="bulletin-title"
             className="mt-1.5 mb-1.5 font-serif text-[27px] leading-[1.1] font-medium text-ink max-xs:text-[23px]"
           >
-            {copy.bulletinTitle}
+            {bulletin?.title || copy.bulletinTitle}
           </h2>
           <p className="text-xs text-water">{copy.audioLanguageTag}</p>
           <p className="mt-2 max-w-[380px] text-[13px] leading-normal text-muted">{copy.bulletinSummary}</p>

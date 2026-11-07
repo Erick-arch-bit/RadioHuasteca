@@ -3,13 +3,15 @@ import { noticeSeeds } from '../data/notices'
 import { getNotices } from '../services/noticeService'
 
 const STORAGE_KEY = 'radiohuasteca-sprint2-notices'
+const CACHE_KEY = 'radiohuasteca-notices-cache'
 
 function readNotices() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null')
-    return Array.isArray(saved) ? [...saved, ...noticeSeeds] : noticeSeeds
+    const cached = JSON.parse(window.localStorage.getItem(CACHE_KEY) ?? 'null')
+    return [...(Array.isArray(cached) ? cached : noticeSeeds.filter((item) => item.status === 'active')), ...(Array.isArray(saved) ? saved : [])]
   } catch {
-    return noticeSeeds
+    return noticeSeeds.filter((item) => item.status === 'active')
   }
 }
 
@@ -17,6 +19,7 @@ export function useNotices(enabled = true) {
   const [notices, setNotices] = useState(readNotices)
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
 
   useEffect(() => {
     if (!enabled) return undefined
@@ -24,14 +27,12 @@ export function useNotices(enabled = true) {
     const refresh = () => getNotices()
       .then((remote) => {
         if (!active || !Array.isArray(remote)) return
-        setNotices((current) => {
-          const local = current.filter((notice) => notice.createdLocally)
-          const remoteIds = new Set(remote.map((notice) => notice.id))
-          return [...remote, ...local, ...noticeSeeds.filter((notice) => !remoteIds.has(notice.id))]
-        })
+        const published = remote.filter((notice) => notice.status === 'active')
+        try { window.localStorage.setItem(CACHE_KEY, JSON.stringify(published.slice(0, 30))) } catch { /* El contenido remoto sigue disponible durante esta sesión. */ }
+        setNotices((current) => [...published, ...current.filter((notice) => notice.createdLocally)])
       })
       .catch(() => {
-        if (active) setNotices(readNotices())
+        if (active) { setNotices(readNotices()); window.dispatchEvent(new Event('radiohuasteca:offline-fallback')) }
       })
     window.addEventListener('radiohuasteca:notices-updated', refresh)
     refresh()
@@ -54,10 +55,11 @@ export function useNotices(enabled = true) {
       notices.filter(
         (notice) =>
           (priorityFilter === 'all' || notice.priority === priorityFilter) &&
+          (categoryFilter === 'all' || notice.type === categoryFilter) &&
           (statusFilter === 'all' || notice.status === statusFilter),
       ),
-    [notices, priorityFilter, statusFilter],
+    [notices, priorityFilter, categoryFilter, statusFilter],
   )
 
-  return { visibleNotices, priorityFilter, setPriorityFilter, statusFilter, setStatusFilter }
+  return { visibleNotices, priorityFilter, setPriorityFilter, statusFilter, setStatusFilter, categoryFilter, setCategoryFilter }
 }

@@ -13,8 +13,10 @@ const email = process.env.ADMIN_EMAIL as string
 const password = process.env.ADMIN_PASSWORD as string
 try {
   await sql`
-    INSERT INTO admins (username, email, password_hash)
-    VALUES (${username}, ${email}, crypt(${password}, gen_salt('bf')))
+    INSERT INTO users (username, email, password_hash, display_name, role, is_active)
+    VALUES (${username}, ${email}, crypt(${password}, gen_salt('bf')), ${username}, 'admin', true)
+    ON CONFLICT (username) DO UPDATE SET email = EXCLUDED.email,
+      password_hash = EXCLUDED.password_hash, is_active = true
   `
   console.log('Cuenta administradora creada.')
 } finally {

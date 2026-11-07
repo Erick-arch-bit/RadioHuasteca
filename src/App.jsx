@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Settings } from 'lucide-react'
 import { BulletinAudio } from './components/BulletinAudio'
 import { BulletinCard } from './components/BulletinCard'
@@ -32,7 +32,7 @@ const ProcedureView = lazy(() => import('./components/ProcedureView').then((modu
 // ---------------------------------------------------------------------------
 
 function App() {
-  const [locale, setLocale] = useState(defaultLocale)
+  const [locale, setLocaleState] = useState(() => window.localStorage.getItem('radiohuasteca-locale') || defaultLocale)
   const [activeView, setActiveView] = useState(homeItem.id)
   const [menuOpen, setMenuOpen] = useState(false)
   const bulletinAudioRef = useRef(null)
@@ -42,6 +42,28 @@ function App() {
   const [activeCapsuleId, setActiveCapsuleId] = useState(null)
   const [capsuleState, setCapsuleState] = useState('idle')
   const [procedureViewKey, setProcedureViewKey] = useState(0)
+  const [bulletinSources, setBulletinSources] = useState(audioSources)
+  const [activeBulletin, setActiveBulletin] = useState(null)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
+
+  const setLocale = useCallback((value) => {
+    setLocaleState(value)
+    try { window.localStorage.setItem('radiohuasteca-locale', value) } catch { /* La sesión actual conserva el idioma. */ }
+  }, [])
+
+  useEffect(() => {
+    const online = () => setIsOffline(false)
+    const offline = () => setIsOffline(true)
+    const apiOffline = () => setIsOffline(true)
+    window.addEventListener('online', online); window.addEventListener('offline', offline); window.addEventListener('radiohuasteca:offline-fallback', apiOffline)
+    const refreshBulletin = () => fetch(`${import.meta.env?.VITE_API_URL ?? ''}/api/bulletins/latest`).then((r) => r.ok ? r.json() : null).then((latest) => {
+      setIsOffline(false)
+      if (latest?.audio_url) { setActiveBulletin(latest); setBulletinSources([{ src: latest.audio_url }, ...audioSources]) }
+    }).catch(() => setIsOffline(true))
+    window.addEventListener('radiohuasteca:bulletin-updated', refreshBulletin)
+    refreshBulletin()
+    return () => { window.removeEventListener('online', online); window.removeEventListener('offline', offline); window.removeEventListener('radiohuasteca:offline-fallback', apiOffline); window.removeEventListener('radiohuasteca:bulletin-updated', refreshBulletin) }
+  }, [])
 
   const copy = getCopy(locale)
   const currentItem = findNavigationItem(activeView)
@@ -111,7 +133,7 @@ function App() {
       <BulletinAudio
         audioRef={bulletinAudioRef}
         onError={player.reportSourceError}
-        sources={audioSources}
+        sources={bulletinSources}
       />
       <audio
         ref={capsuleAudioRef}
@@ -130,15 +152,17 @@ function App() {
           data-testid="menu-backdrop"
           aria-label={copy.closeMenu}
           onClick={closeMenu}
-          className="fixed inset-0 z-30 cursor-default border-0 bg-ink/25 desk:hidden"
+          className="fixed inset-0 z-30 cursor-default border-0 bg-ink/25 min-[1000px]:hidden"
         />
       ) : null}
 
       <TopBar
+        activeView={activeView}
         copy={copy}
         locale={locale}
         menuOpen={menuOpen}
         onGoHome={goHome}
+        onSelect={goTo}
         onSelectLocale={setLocale}
         onToggleMenu={toggleMenu}
       >
@@ -146,13 +170,16 @@ function App() {
       </TopBar>
 
       {isDraft ? <LanguageDraftNotice copy={copy} /> : null}
+      {isOffline ? <div role="status" className="mx-auto mt-3 flex w-[min(100%-26px,980px)] items-center justify-between gap-3 rounded-lg border border-sun bg-paper p-3 text-sm text-ink"><span>Sin conexión. Mostramos el contenido guardado.</span><button type="button" onClick={() => window.location.reload()} className="min-h-10 rounded-lg bg-forest px-3 font-bold text-paper">Reintentar</button></div> : null}
 
-      <main className="mx-auto w-[min(100%-26px,980px)] pt-[42px] pb-[126px] desk:w-[min(100%-36px,980px)] desk:pt-[62px]">
+      <main className="mx-auto w-[min(100%-26px,980px)] pt-[42px] pb-[126px] desk:w-[min(100%-64px,1180px)] desk:pt-[62px] min-[1000px]:pb-16">
         <Suspense fallback={<p role="status" className="rounded-xl border border-line bg-paper p-4 text-sm text-muted">Cargando sección…</p>}>
         {isHome ? (
           <>
-            <WelcomeBlock copy={copy} />
-            <BulletinCard copy={copy} player={player} sources={audioSources} />
+            <div className="desk:grid desk:grid-cols-[.9fr_1.1fr] desk:items-center desk:gap-12">
+              <WelcomeBlock copy={copy} />
+              <BulletinCard copy={copy} player={player} sources={bulletinSources} bulletin={activeBulletin} />
+            </div>
             <QuickNav copy={copy} onSelect={goTo} />
           </>
         ) : activeView === 'avisos' ? (
